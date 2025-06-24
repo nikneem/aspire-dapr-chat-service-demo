@@ -1,0 +1,76 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Messages", "Messages", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Realtime", "Realtime", "{264AC3E8-6A0C-4D19-A87A-5CBD690357ED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Members", "Members", "{93643E78-7FE8-4A47-9305-1D2995B7FCCD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{E5032101-09FC-4933-8E22-3618EB9DBCD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Aspire.AppHost", "Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.AppHost\HexMaster.Chat.Aspire.AppHost.csproj", "{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Aspire.ServiceDefaults", "Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj", "{61476EEC-6224-0C6F-D504-E7AD7C7918BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Members.Api", "Members\HexMaster.Chat.Members.Api\HexMaster.Chat.Members.Api.csproj", "{6F9BB1FA-5240-18CF-D9F0-D626A22B529B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Messages.Api", "Messages\HexMaster.Chat.Messages.Api\HexMaster.Chat.Messages.Api.csproj", "{618A8504-9678-E33F-E3B5-80183A0A02C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Realtime.Api", "Realtime\HexMaster.Chat.Realtime.Api\HexMaster.Chat.Realtime.Api.csproj", "{CBF35858-1344-D7B1-607F-51CE71668EB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{046DB6E6-07CC-4926-8732-F2DBFD343B04}"
+	ProjectSection(SolutionItems) = preProject
+		AspireConstants.cs = AspireConstants.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Shared", "Shared\HexMaster.Chat.Shared\HexMaster.Chat.Shared.csproj", "{A1B2C3D4-E5F6-7890-ABCD-123456789012}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61476EEC-6224-0C6F-D504-E7AD7C7918BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61476EEC-6224-0C6F-D504-E7AD7C7918BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61476EEC-6224-0C6F-D504-E7AD7C7918BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61476EEC-6224-0C6F-D504-E7AD7C7918BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F9BB1FA-5240-18CF-D9F0-D626A22B529B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F9BB1FA-5240-18CF-D9F0-D626A22B529B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F9BB1FA-5240-18CF-D9F0-D626A22B529B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F9BB1FA-5240-18CF-D9F0-D626A22B529B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{618A8504-9678-E33F-E3B5-80183A0A02C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{618A8504-9678-E33F-E3B5-80183A0A02C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{618A8504-9678-E33F-E3B5-80183A0A02C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{618A8504-9678-E33F-E3B5-80183A0A02C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBF35858-1344-D7B1-607F-51CE71668EB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBF35858-1344-D7B1-607F-51CE71668EB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBF35858-1344-D7B1-607F-51CE71668EB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBF35858-1344-D7B1-607F-51CE71668EB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-ABCD-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02F7198D-7B5E-4F98-A4A9-0F87A221B4DF} = {E5032101-09FC-4933-8E22-3618EB9DBCD4}
+		{61476EEC-6224-0C6F-D504-E7AD7C7918BC} = {E5032101-09FC-4933-8E22-3618EB9DBCD4}
+		{6F9BB1FA-5240-18CF-D9F0-D626A22B529B} = {93643E78-7FE8-4A47-9305-1D2995B7FCCD}
+		{618A8504-9678-E33F-E3B5-80183A0A02C2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{CBF35858-1344-D7B1-607F-51CE71668EB5} = {264AC3E8-6A0C-4D19-A87A-5CBD690357ED}
+		{A1B2C3D4-E5F6-7890-ABCD-123456789012} = {046DB6E6-07CC-4926-8732-F2DBFD343B04}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8AFAFB6B-E92D-4D68-890E-1193E0F4A1C7}
+	EndGlobalSection
+EndGlobal

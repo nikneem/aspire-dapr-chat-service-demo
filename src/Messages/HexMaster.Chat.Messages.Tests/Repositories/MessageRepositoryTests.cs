@@ -59,7 +59,7 @@ public class MessageRepositoryTests
             {
                 RowKey = "msg1",
                 Content = "First message",
-                SentAt = DateTime.UtcNow.AddMinutes(-10)
+                SentAt = DateTime.UtcNow.AddMinutes(-1)
             },
             new()
             {
@@ -71,7 +71,7 @@ public class MessageRepositoryTests
             {
                 RowKey = "msg3",
                 Content = "Third message",
-                SentAt = DateTime.UtcNow.AddMinutes(-1)
+                SentAt = DateTime.UtcNow.AddMinutes(-10)
             }
         };
 

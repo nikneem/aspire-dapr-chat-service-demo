@@ -46,7 +46,7 @@ public class MessageRepository : IMessageRepository
                 break;
         }
 
-        return entities.OrderByDescending(x => x.SentAt).Take(count);
+        return entities.OrderBy(x => x.SentAt).Take(count);
     }
 
     public async Task<IEnumerable<MessageEntity>> GetMessagesByDateRangeAsync(DateTime from, DateTime to)

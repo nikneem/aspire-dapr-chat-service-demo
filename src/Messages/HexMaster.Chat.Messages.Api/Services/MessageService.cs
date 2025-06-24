@@ -11,7 +11,7 @@ namespace HexMaster.Chat.Messages.Api.Services;
 
 public interface IMessageService
 {
-    Task<ChatMessage> SendMessageAsync(SendMessageRequest request, string senderName);
+    Task<ChatMessage> SendMessageAsync(SendMessageRequest request);
     Task<IEnumerable<ChatMessage>> GetRecentMessagesAsync(int count = 50);
     Task<IEnumerable<ChatMessage>> GetMessageHistoryAsync(DateTime from, DateTime to);
     Task RemoveExpiredMessagesAsync();
@@ -21,19 +21,22 @@ public class MessageService : IMessageService
 {
     private readonly IMessageRepository _repository;
     private readonly DaprClient _daprClient;
+    private readonly IMemberStateService _memberStateService;
     private readonly ILogger<MessageService> _logger;
 
     public MessageService(
         IMessageRepository repository,
         DaprClient daprClient,
+        IMemberStateService memberStateService,
         ILogger<MessageService> logger)
     {
         _repository = repository;
         _daprClient = daprClient;
+        _memberStateService = memberStateService;
         _logger = logger;
     }
 
-    public async Task<ChatMessage> SendMessageAsync(SendMessageRequest request, string senderName)
+    public async Task<ChatMessage> SendMessageAsync(SendMessageRequest request)
     {
         // Validate message content
         if (string.IsNullOrWhiteSpace(request.Content))
@@ -44,6 +47,20 @@ public class MessageService : IMessageService
         if (request.Content.Length > 1000)
         {
             throw new ArgumentException("Message content too long (max 1000 characters)");
+        }
+
+        // Get sender name from state store
+        var senderName = await _memberStateService.GetMemberNameAsync(request.SenderId);
+        if (string.IsNullOrEmpty(senderName))
+        {
+            // Fallback to placeholder name if member not found in state store
+            senderName = $"User_{request.SenderId[..Math.Min(8, request.SenderId.Length)]}";
+            _logger.LogWarning("Member {SenderId} not found in state store, using fallback name", request.SenderId);
+        }
+        else
+        {
+            // Update member activity to extend sliding expiration
+            await _memberStateService.UpdateMemberActivityAsync(request.SenderId);
         }
 
         // Basic profanity filtering (in production, use a proper service)

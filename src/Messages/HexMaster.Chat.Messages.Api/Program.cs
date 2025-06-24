@@ -10,9 +10,13 @@ builder.AddServiceDefaults();
 // Add Azure Table Storage
 builder.AddAzureTableClient("tables");
 
+// Add controllers for Dapr event handling
+builder.Services.AddControllers().AddDapr();
+
 // Add services
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IMemberStateService, MemberStateService>();
 
 // Add background services
 builder.Services.AddHostedService<MessageCleanupService>();
@@ -33,6 +37,9 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 app.UseCors();
 
+// Map controllers for Dapr event handling
+app.MapControllers();
+
 // API endpoints
 app.MapPost("/messages", async (SendMessageRequest request, IMessageService messageService) =>
 {
@@ -43,11 +50,7 @@ app.MapPost("/messages", async (SendMessageRequest request, IMessageService mess
 
     try
     {
-        // In a real application, you would get the sender name from the member service
-        // For demo purposes, we'll use a placeholder
-        var senderName = $"User_{request.SenderId[..8]}";
-
-        var message = await messageService.SendMessageAsync(request, senderName);
+        var message = await messageService.SendMessageAsync(request);
         return Results.Created($"/messages/{message.Id}", message);
     }
     catch (ArgumentException ex)

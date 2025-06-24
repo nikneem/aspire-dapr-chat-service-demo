@@ -1,10 +1,12 @@
 using CommunityToolkit.Aspire.Hosting.Dapr;
-using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 var storage = builder.AddAzureStorage("storage")
-    .RunAsEmulator();
+    .RunAsEmulator(options =>
+    {
+        options.WithLifetime(ContainerLifetime.Persistent);
+    });
 
 var tables = storage.AddTables("tables");
 
@@ -25,8 +27,10 @@ var messagesApi = builder.AddProject<Projects.HexMaster_Chat_Messages_Api>(Aspir
     .WithReference(tables)
     .WithDaprSidecar(daprOptions);
 
+
 var realtimeApi = builder.AddProject<Projects.HexMaster_Chat_Realtime_Api>(AspireConstants.RealtimeApiName)
     .WithDaprSidecar(daprOptions);
+
 
 // Add Node.js Chat Client
 var chatClient = builder.AddNpmApp(AspireConstants.ChatClientName, "../../../ChatClient")
@@ -36,7 +40,7 @@ var chatClient = builder.AddNpmApp(AspireConstants.ChatClientName, "../../../Cha
     .WaitFor(membersApi)
     .WaitFor(messagesApi)
     .WaitFor(realtimeApi)
-    .WithHttpEndpoint(env: "PORT")
+    .WithHttpEndpoint(env: "PORT", name: "Chat-Client")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 

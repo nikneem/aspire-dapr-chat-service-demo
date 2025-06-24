@@ -12,7 +12,6 @@ public class EventsControllerTests
 {
     private readonly Mock<IHubContext<ChatHub, IChatClient>> _mockHubContext;
     private readonly Mock<ILogger<EventsController>> _mockLogger;
-    private readonly Mock<IGroupManager> _mockGroupManager;
     private readonly Mock<IChatClient> _mockChatClient;
     private readonly EventsController _controller;
 
@@ -20,7 +19,6 @@ public class EventsControllerTests
     {
         _mockHubContext = new Mock<IHubContext<ChatHub, IChatClient>>();
         _mockLogger = new Mock<ILogger<EventsController>>();
-        _mockGroupManager = new Mock<IGroupManager>();
         _mockChatClient = new Mock<IChatClient>();
 
         var mockClients = new Mock<IHubCallerClients<IChatClient>>();

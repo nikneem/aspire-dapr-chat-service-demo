@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Members.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Messages.Tests", "Messages\HexMaster.Chat.Messages.Tests\HexMaster.Chat.Messages.Tests.csproj", "{95DFD23D-84BD-4F37-911C-7FC37D57E96C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Realtime.Tests", "HexMaster.Chat.Realtime.Tests\HexMaster.Chat.Realtime.Tests.csproj", "{C78ED0B7-386D-4726-B280-8865F07BF379}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexMaster.Chat.Realtime.Tests", "Realtime\HexMaster.Chat.Realtime.Tests\HexMaster.Chat.Realtime.Tests.csproj", "{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,10 +72,10 @@ Global
 		{95DFD23D-84BD-4F37-911C-7FC37D57E96C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95DFD23D-84BD-4F37-911C-7FC37D57E96C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95DFD23D-84BD-4F37-911C-7FC37D57E96C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C78ED0B7-386D-4726-B280-8865F07BF379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C78ED0B7-386D-4726-B280-8865F07BF379}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C78ED0B7-386D-4726-B280-8865F07BF379}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C78ED0B7-386D-4726-B280-8865F07BF379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,7 +89,7 @@ Global
 		{A1B2C3D4-E5F6-7890-ABCD-123456789012} = {046DB6E6-07CC-4926-8732-F2DBFD343B04}
 		{808A5BAF-62E1-42B5-BAB8-F4AB4CD4E810} = {93643E78-7FE8-4A47-9305-1D2995B7FCCD}
 		{95DFD23D-84BD-4F37-911C-7FC37D57E96C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{C78ED0B7-386D-4726-B280-8865F07BF379} = {264AC3E8-6A0C-4D19-A87A-5CBD690357ED}
+		{BDEF6D72-E1AE-23E7-99B6-5DD0ED6AFD50} = {264AC3E8-6A0C-4D19-A87A-5CBD690357ED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8AFAFB6B-E92D-4D68-890E-1193E0F4A1C7}

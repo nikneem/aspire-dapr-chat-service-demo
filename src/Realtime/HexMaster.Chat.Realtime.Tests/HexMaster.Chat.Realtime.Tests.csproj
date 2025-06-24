@@ -18,12 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="..\HexMaster.Chat.Realtime.Api\HexMaster.Chat.Realtime.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\Realtime\HexMaster.Chat.Realtime.Api\HexMaster.Chat.Realtime.Api.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>

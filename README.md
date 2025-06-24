@@ -4,11 +4,12 @@ A distributed chat application backend built with .NET 9, ASP.NET Core, .NET Asp
 
 ## Architecture Overview
 
-The application consists of three main microservices:
+The application consists of four main components:
 
-- **Members API** (`localhost:5196`): Manages user registration and member lifecycle
-- **Messages API** (`localhost:5113`): Handles message processing and storage
-- **Realtime API** (`localhost:5197`): Provides real-time message broadcasting via SignalR
+- **Members API** (`localhost:5129`): Manages user registration and member lifecycle
+- **Messages API** (`localhost:5227`): Handles message processing and storage
+- **Realtime API** (`localhost:5206`): Provides real-time message broadcasting via SignalR
+- **Chat Client** (`localhost:3000`): Node.js-based web client serving the chat interface
 
 All services are orchestrated using .NET Aspire and communicate through Dapr pub/sub messaging patterns.
 
@@ -16,6 +17,7 @@ All services are orchestrated using .NET Aspire and communicate through Dapr pub
 
 - **.NET 9**: Latest .NET version for all projects
 - **ASP.NET Core Web APIs**: RESTful service endpoints
+- **Node.js & Express**: Chat client web server
 - **Azure Table Storage**: Data persistence (using Azurite emulator for local development)
 - **Dapr**: Event-driven pub/sub messaging
 - **Redis**: Dapr state store and pub/sub backend
@@ -26,10 +28,11 @@ All services are orchestrated using .NET Aspire and communicate through Dapr pub
 
 Before running the application, ensure you have the following installed:
 
-1. **.NET 9 SDK**: Download from [https://dotnet.microsoft.com/download/dotnet/9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
-2. **Docker Desktop**: Required for Redis and Azurite containers
-3. **Dapr CLI**: Install from [https://docs.dapr.io/getting-started/install-dapr-cli/](https://docs.dapr.io/getting-started/install-dapr-cli/)
-4. **Visual Studio 2022** or **Visual Studio Code** (recommended)
+2. **.NET 9 SDK**: Download from [https://dotnet.microsoft.com/download/dotnet/9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
+3. **Node.js** (v20 or later): Download from [https://nodejs.org/](https://nodejs.org/)
+4. **Docker Desktop**: Required for Redis and Azurite containers
+5. **Dapr CLI**: Install from [https://docs.dapr.io/getting-started/install-dapr-cli/](https://docs.dapr.io/getting-started/install-dapr-cli/)
+6. **Visual Studio 2022** or **Visual Studio Code** (recommended)
 
 ### Installing Dapr
 
@@ -69,15 +72,15 @@ dotnet run --project Aspire/HexMaster.Chat.Aspire/HexMaster.Chat.Aspire.AppHost
 
 Once running, you'll have access to:
 
-- **Aspire Dashboard**: `https://localhost:15888` (orchestration and monitoring)
-- **Members API**: `http://localhost:5196`
-- **Messages API**: `http://localhost:5113`
-- **Realtime API**: `http://localhost:5197`
-- **Test Client**: Open `test-client.html` in your browser
+- **Aspire Dashboard**: `https://localhost:17180` (orchestration and monitoring)
+- **Chat Client**: `http://localhost:3000` (main user interface)
+- **Members API**: `http://localhost:5129`
+- **Messages API**: `http://localhost:5227`
+- **Realtime API**: `http://localhost:5206`
 
 ## API Endpoints
 
-### Members API (`localhost:5196`)
+### Members API (`localhost:5129`)
 
 ```http
 POST /members
@@ -92,7 +95,7 @@ GET /members/{id}
 PUT /members/{id}/activity
 ```
 
-### Messages API (`localhost:5113`)
+### Messages API (`localhost:5227`)
 
 ```http
 POST /messages
@@ -107,18 +110,21 @@ GET /messages/recent?count=50
 GET /messages/history?from=2024-01-01&to=2024-01-02
 ```
 
-### Realtime API (`localhost:5197`)
+### Realtime API (`localhost:5206`)
 
 - **SignalR Hub**: `/chathub`
 - **Event Endpoints**: Handled automatically by Dapr subscriptions
 
-## Using the Test Client
+## Using the Chat Client
 
-1. Open `test-client.html` in your web browser
-2. Enter your name and email, then click "Register & Connect"
-3. Start typing messages in the message box
-4. Open multiple browser tabs to simulate multiple users
-5. Watch real-time message delivery across all connected clients
+1. Start the Aspire application using one of the methods above
+2. Navigate to `http://localhost:3000` in your web browser
+3. Enter your name and email, then click "Register & Connect"
+4. Start typing messages in the message box
+5. Open multiple browser tabs to simulate multiple users
+6. Watch real-time message delivery across all connected clients
+
+The chat client automatically detects the backend service URLs through Aspire's service discovery mechanism.
 
 ## Event-Driven Architecture
 
@@ -147,6 +153,29 @@ The application uses Dapr pub/sub for loose coupling between services:
 4. **Message Cleanup**:
    - Background service removes old messages (>24 hours)
    - Runs automatically every hour
+
+## Project Structure
+
+```
+src/
+├── Aspire/
+│   ├── HexMaster.Chat.Aspire.AppHost/          # Aspire orchestration
+│   └── HexMaster.Chat.Aspire.ServiceDefaults/  # Shared configuration
+├── ChatClient/                                  # Node.js web client
+│   ├── public/
+│   │   └── index.html                          # Chat interface
+│   ├── server.js                               # Express.js server
+│   ├── package.json                            # Node.js dependencies
+│   └── Dockerfile                              # Container configuration
+├── Members/
+│   └── HexMaster.Chat.Members.Api/             # Member management service
+├── Messages/
+│   └── HexMaster.Chat.Messages.Api/            # Message handling service
+├── Realtime/
+│   └── HexMaster.Chat.Realtime.Api/            # SignalR service
+└── Shared/
+    └── HexMaster.Chat.Shared/                   # Common models and utilities
+```
 
 ## Monitoring and Observability
 

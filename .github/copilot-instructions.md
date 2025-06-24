@@ -9,12 +9,14 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - **Members API**: Manages chat members and user registration
 - **Messages API**: Handles message sending and storage
 - **Realtime API**: Broadcasts messages to clients via SignalR
+- **Chat Client**: Node.js-based web client serving the chat interface
 - **Aspire AppHost**: Orchestrates all services and dependencies
 
 ## Technology Stack
 
 - **.NET 9**: Latest .NET version for all projects
 - **ASP.NET Core Web APIs**: RESTful service endpoints
+- **Node.js & Express**: Chat client web server
 - **Azure Table Storage**: Data persistence for members and messages
 - **Dapr**: Event-driven pub/sub messaging
 - **Redis**: Dapr state store and pub/sub backend
@@ -43,6 +45,70 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Broadcast messages to connected clients via SignalR
 - Manage SignalR connections and groups
 - Handle real-time notifications
+
+### Chat Client (`src/ChatClient`)
+
+- Serves the chat application UI via Express.js server
+- Provides configuration endpoint exposing Aspire service URLs
+- Handles static file serving for the web interface
+- Integrates with .NET Aspire orchestration via AddNpmApp
+
+## Project Structure
+
+```
+src/
+├── Aspire/
+│   ├── HexMaster.Chat.Aspire.AppHost/          # Aspire orchestration
+│   │   ├── Program.cs                          # Service configuration
+│   │   ├── appsettings.json                    # Environment settings
+│   │   └── HexMaster.Chat.Aspire.AppHost.csproj
+│   └── HexMaster.Chat.Aspire.ServiceDefaults/  # Shared configuration
+│       ├── Extensions.cs                       # Common service extensions
+│       └── HexMaster.Chat.Aspire.ServiceDefaults.csproj
+├── ChatClient/                                  # Node.js web client
+│   ├── public/
+│   │   └── index.html                          # Chat interface
+│   ├── server.js                               # Express.js server
+│   ├── package.json                            # Node.js dependencies
+│   ├── Dockerfile                              # Container configuration
+│   └── README.md                               # Client documentation
+├── Members/
+│   └── HexMaster.Chat.Members.Api/             # Member management service
+│       ├── BackgroundServices/
+│       │   └── MemberCleanupService.cs         # Inactive member cleanup
+│       ├── Entities/
+│       │   └── MemberEntity.cs                 # Member data model
+│       ├── Repositories/
+│       │   └── MemberRepository.cs             # Data access layer
+│       ├── Services/
+│       │   └── MemberService.cs                # Business logic
+│       └── Program.cs                          # Service configuration
+├── Messages/
+│   └── HexMaster.Chat.Messages.Api/            # Message handling service
+│       ├── BackgroundServices/
+│       │   └── MessageCleanupService.cs        # Message retention
+│       ├── Entities/
+│       │   └── MessageEntity.cs                # Message data model
+│       ├── Repositories/
+│       │   └── MessageRepository.cs            # Data access layer
+│       ├── Services/
+│       │   └── MessageService.cs               # Business logic
+│       └── Program.cs                          # Service configuration
+├── Realtime/
+│   └── HexMaster.Chat.Realtime.Api/            # SignalR service
+│       ├── Controllers/                        # Dapr event controllers
+│       ├── Hubs/
+│       │   └── ChatHub.cs                      # SignalR hub
+│       └── Program.cs                          # Service configuration
+├── Shared/
+│   └── HexMaster.Chat.Shared/                  # Common models and utilities
+│       ├── Constants/                          # Application constants
+│       ├── Events/                             # Dapr event models
+│       ├── Models/                             # Shared DTOs
+│       └── Requests/                           # API request models
+├── AspireConstants.cs                          # Service name constants
+└── Aspire Chat.sln                            # Solution file
+```
 
 ## Development Guidelines
 
@@ -89,6 +155,15 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Handle client disconnections gracefully
 - Use groups for targeted message broadcasting
 
+### Chat Client Development
+
+- Use Express.js for serving the web interface
+- Implement configuration endpoints for Aspire service discovery
+- Use environment variables for service URL configuration
+- Follow Node.js best practices for error handling and logging
+- Ensure CORS is properly configured for cross-origin requests
+- Use npm scripts for development and production builds
+
 ## Common Patterns
 
 ### Message Flow
@@ -104,6 +179,13 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 2. Members API stores member data
 3. Members API publishes member joined event
 4. Realtime API notifies existing clients
+
+### Chat Client Configuration Flow
+
+1. Chat Client starts and requests configuration from `/api/config`
+2. Server responds with Aspire-discovered service URLs
+3. Client uses these URLs for API communication
+4. Automatic service discovery ensures proper connectivity
 
 ### Configuration
 
@@ -136,9 +218,12 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 ## Dependencies
 
 - Aspire.Hosting for orchestration
+- Aspire.Hosting.NodeJs for Node.js integration
 - Dapr.AspNetCore for pub/sub integration
 - Azure.Data.Tables for storage
 - Microsoft.AspNetCore.SignalR for real-time communication
 - Microsoft.Extensions.Hosting for background services
+- Express.js for the Node.js web server
+- CORS for cross-origin resource sharing
 
 When suggesting code changes or new features, ensure they align with this distributed architecture and maintain consistency across all services.

@@ -1,0 +1,27 @@
+server {
+    listen       ${PORT};
+    listen  [::]:${PORT};
+    server_name  localhost;
+
+    access_log  /var/log/nginx/server.access.log  main;
+
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/config {
+        # Return configuration based on environment variables
+        default_type application/json;
+        return 200 '{
+            "membersApiUrl": "${services__hexmaster_chat_members_api__http__0}",
+            "messagesApiUrl": "${services__hexmaster_chat_messages_api__http__0}",
+            "realtimeApiUrl": "${services__hexmaster_chat_realtime_api__http__0}"
+        }';
+    }
+
+    location /health {
+        default_type application/json;
+        return 200 '{"status": "healthy", "timestamp": "${time_iso8601}"}';
+    }
+}

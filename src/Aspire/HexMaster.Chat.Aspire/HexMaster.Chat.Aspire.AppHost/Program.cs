@@ -1,4 +1,5 @@
 using CommunityToolkit.Aspire.Hosting.Dapr;
+using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -26,5 +27,17 @@ var messagesApi = builder.AddProject<Projects.HexMaster_Chat_Messages_Api>(Aspir
 
 var realtimeApi = builder.AddProject<Projects.HexMaster_Chat_Realtime_Api>(AspireConstants.RealtimeApiName)
     .WithDaprSidecar(daprOptions);
+
+// Add Node.js Chat Client
+var chatClient = builder.AddNpmApp(AspireConstants.ChatClientName, "../../../ChatClient")
+    .WithReference(membersApi)
+    .WithReference(messagesApi)
+    .WithReference(realtimeApi)
+    .WaitFor(membersApi)
+    .WaitFor(messagesApi)
+    .WaitFor(realtimeApi)
+    .WithHttpEndpoint(env: "PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
 
 builder.Build().Run();

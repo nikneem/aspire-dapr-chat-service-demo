@@ -15,13 +15,13 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
 
-<a href="#architecture">Architecture</a> •
-<a href="#technology">Technology</a> •
-<a href="#prerequisites">Prerequisites</a> •
-<a href="#monitoring">Monitoring</a> •
-<a href="#endpoints">Endpoints</a> •
-<a href="#contributing">Contributing</a> •
-<a href="#license">License</a> •
+<a href="#architecture">Architecture</a> |
+<a href="#technology">Technology</a> |
+<a href="#prerequisites">Prerequisites</a> |
+<a href="#monitoring">Monitoring</a> |
+<a href="#endpoints">Endpoints</a> |
+<a href="#contributing">Contributing</a> |
+<a href="#license">License</a> |
 <a href="#support">Support</a>
 
 </div>

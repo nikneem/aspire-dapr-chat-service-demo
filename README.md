@@ -28,7 +28,9 @@
 
 # Aspire Dapr Chat Service Demo
 
-A distributed chat application backend built with .NET 9, ASP.NET Core, .NET Aspire, and Dapr. This demonstration showcases event-driven microservices architecture with real-time messaging capabilities.
+A distributed chat application backend built with .NET 9, ASP.NET Core, .NET Aspire, and Dapr. This demonstration showcases event-driven microservices architecture with real-time messaging capabilities. All orchestrated locally with .NET Aspire and in the cloud with Azure Container Apps (expected soon).
+
+![alt text](docs/screendump.png)
 
 ## Architecture
 

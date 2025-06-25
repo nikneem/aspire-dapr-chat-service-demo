@@ -1,4 +1,5 @@
 using CommunityToolkit.Aspire.Hosting.Dapr;
+using HexMaster.Chat.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 

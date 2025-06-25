@@ -52,4 +52,4 @@ app.MapPut("/members/{id}/activity", async (string id, IMemberService memberServ
     return Results.Ok();
 });
 
-app.Run();
+await app.RunAsync();

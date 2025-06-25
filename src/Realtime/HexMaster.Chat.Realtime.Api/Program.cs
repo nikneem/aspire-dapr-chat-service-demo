@@ -51,4 +51,4 @@ app.MapControllers();
 // Map SignalR hub with CORS support
 app.MapHub<ChatHub>("/chathub");
 
-app.Run();
+await app.RunAsync();

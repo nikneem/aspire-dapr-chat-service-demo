@@ -257,12 +257,13 @@
 
         // Test Members API
         try {
-          const response = await fetch(`${config.membersApiUrl}/`, {
+          await fetch(`${config.membersApiUrl}/`, {
             method: "HEAD",
             timeout: 5000,
           });
           addSystemMessage("✓ Members API is accessible");
         } catch (error) {
+            console.log("Members API connectivity test failed:", error);
           addSystemMessage(
             "✗ Members API is not accessible - check if service is running"
           );
@@ -270,12 +271,13 @@
 
         // Test Messages API
         try {
-          const response = await fetch(`${config.messagesApiUrl}/`, {
+          await fetch(`${config.messagesApiUrl}/`, {
             method: "HEAD",
             timeout: 5000,
           });
           addSystemMessage("✓ Messages API is accessible");
         } catch (error) {
+            console.log("Messages API connectivity test failed:", error);
           addSystemMessage(
             "✗ Messages API is not accessible - check if service is running"
           );

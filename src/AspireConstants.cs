@@ -1,5 +1,5 @@
 ﻿using System;
-
+namespace HexMaster.Chat.Aspire;
 public static class AspireConstants
 {
     public const string MembersApiName = "hexmaster-chat-members-api";

@@ -1,5 +1,5 @@
 # Multi-stage build for Node.js chat client
-FROM node:20-alpine as base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 

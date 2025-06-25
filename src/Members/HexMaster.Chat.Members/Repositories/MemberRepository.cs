@@ -30,16 +30,16 @@ public class MemberRepository : IMemberRepository
         }
     }
 
-    public async Task<MemberEntityDto> CreateAsync(MemberEntityDto memberDto)
+    public async Task<MemberEntityDto> CreateAsync(MemberEntityDto member)
     {
-        var entity = MapToEntity(memberDto);
+        var entity = MapToEntity(member);
         await _tableClient.AddEntityAsync(entity);
         return MapToDto(entity);
     }
 
-    public async Task<MemberEntityDto> UpdateAsync(MemberEntityDto memberDto)
+    public async Task<MemberEntityDto> UpdateAsync(MemberEntityDto member)
     {
-        var entity = MapToEntity(memberDto);
+        var entity = MapToEntity(member);
         await _tableClient.UpdateEntityAsync(entity, entity.ETag);
         return MapToDto(entity);
     }

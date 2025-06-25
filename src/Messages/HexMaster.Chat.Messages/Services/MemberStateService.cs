@@ -105,7 +105,7 @@ public class MemberStateService : IMemberStateService
 
     private static string GetMemberStateKey(string memberId) => $"member:{memberId}";
 
-    private class MemberCacheData
+    private sealed class MemberCacheData
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;

@@ -12,6 +12,7 @@ public interface IChatClient
 public class ChatHub : Hub<IChatClient>
 {
     private readonly ILogger<ChatHub> _logger;
+    private const string ChatRoom = "ChatRoom";
 
     public ChatHub(ILogger<ChatHub> logger)
     {
@@ -21,26 +22,26 @@ public class ChatHub : Hub<IChatClient>
     public override async Task OnConnectedAsync()
     {
         _logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
-        await Groups.AddToGroupAsync(Context.ConnectionId, "ChatRoom");
+        await Groups.AddToGroupAsync(Context.ConnectionId, ChatRoom);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         _logger.LogInformation("Client disconnected: {ConnectionId}", Context.ConnectionId);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "ChatRoom");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatRoom);
         await base.OnDisconnectedAsync(exception);
     }
 
     public async Task JoinChatRoom(string userId, string userName)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, "ChatRoom");
+        await Groups.AddToGroupAsync(Context.ConnectionId, ChatRoom);
         _logger.LogInformation("User {UserId} ({UserName}) joined chat room", userId, userName);
     }
 
     public async Task LeaveChatRoom(string userId, string userName)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, "ChatRoom");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatRoom);
         _logger.LogInformation("User {UserId} ({UserName}) left chat room", userId, userName);
     }
 }

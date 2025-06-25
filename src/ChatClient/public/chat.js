@@ -1,125 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat Application Test Client</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      .chat-container {
-        border: 1px solid #ccc;
-        height: 400px;
-        overflow-y: auto;
-        padding: 10px;
-        margin-bottom: 20px;
-        background-color: #f9f9f9;
-      }
-      .message {
-        margin-bottom: 10px;
-        padding: 5px;
-        background-color: white;
-        border-radius: 5px;
-      }
-      .message-header {
-        font-weight: bold;
-        color: #666;
-        font-size: 12px;
-      }
-      .message-content {
-        margin-top: 5px;
-      }
-      .system-message {
-        background-color: #e7f3ff;
-        font-style: italic;
-      }
-      .input-container {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-      input[type="text"] {
-        flex: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      button {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
-      button:disabled {
-        background-color: #6c757d;
-        cursor: not-allowed;
-      }
-      .status {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-      }
-      .status.connected {
-        background-color: #d4edda;
-        color: #155724;
-      }
-      .status.disconnected {
-        background-color: #f8d7da;
-        color: #721c24;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Chat Application Test Client</h1>
-
-    <div id="status" class="status disconnected">Disconnected</div>
-
-    <div class="input-container">
-      <input type="text" id="nameInput" placeholder="Your name" />
-      <input type="text" id="emailInput" placeholder="Your email" />
-      <button onclick="registerMember()" id="registerBtn">
-        Register & Connect
-      </button>
-    </div>
-
-    <div class="chat-container" id="chatContainer">
-      <div class="message system-message">
-        <div class="message-content">
-          Welcome! Please register to start chatting.
-        </div>
-      </div>
-    </div>
-
-    <div class="input-container">
-      <input
-        type="text"
-        id="messageInput"
-        placeholder="Type your message..."
-        disabled
-      />
-      <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
-    </div>
-
-    <script src="https://unpkg.com/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
-    <script>
       let connection = null;
       let currentUser = null;
+      let config = null;
 
-      // Configuration - update these URLs based on your Aspire deployment
-      const config = {
-        membersApiUrl: "http://localhost:5129", // Members API port
-        messagesApiUrl: "http://localhost:5227", // Messages API port
-        realtimeApiUrl: "http://localhost:5206", // Realtime API port
-      };
+      // Get configuration from server endpoint
+      async function loadConfiguration() {
+        try {
+          const response = await fetch("/api/config");
+          if (response.ok) {
+            config = await response.json();
+            updateConfigDisplay();
+            return true;
+          } else {
+            // Fallback to default configuration for development
+            config = {
+              membersApiUrl: "http://localhost:5129",
+              messagesApiUrl: "http://localhost:5227",
+              realtimeApiUrl: "http://localhost:5206",
+            };
+            updateConfigDisplay();
+            addSystemMessage(
+              "Using fallback configuration - ensure Aspire services are running"
+            );
+            return false;
+          }
+        } catch (error) {
+          console.error("Failed to load configuration:", error);
+          // Fallback configuration
+          config = {
+            membersApiUrl: "http://localhost:5129",
+            messagesApiUrl: "http://localhost:5227",
+            realtimeApiUrl: "http://localhost:5206",
+          };
+          updateConfigDisplay();
+          addSystemMessage("Failed to load configuration - using defaults");
+          return false;
+        }
+      }
+
+      function updateConfigDisplay() {
+        const configDiv = document.getElementById("configInfo");
+        configDiv.innerHTML = `
+          <strong>Service Configuration:</strong><br>
+          Members API: ${config.membersApiUrl}<br>
+          Messages API: ${config.messagesApiUrl}<br>
+          Realtime API: ${config.realtimeApiUrl}
+        `;
+      }
 
       async function registerMember() {
         const name = document.getElementById("nameInput").value.trim();
@@ -360,7 +286,7 @@
       }
 
       // Initialize when page loads
-      window.addEventListener("load", testConnectivity);
-    </script>
-  </body>
-</html>
+      window.addEventListener("load", async () => {
+        await loadConfiguration();
+        await testConnectivity();
+      });

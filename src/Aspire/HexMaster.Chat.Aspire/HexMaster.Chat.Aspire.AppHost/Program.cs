@@ -33,7 +33,7 @@ var realtimeApi = builder.AddProject<Projects.HexMaster_Chat_Realtime_Api>(Aspir
 
 
 // Add Node.js Chat Client
-var chatClient = builder.AddNpmApp(AspireConstants.ChatClientName, "../../../ChatClient")
+builder.AddNpmApp(AspireConstants.ChatClientName, "../../../ChatClient")
     .WithReference(membersApi)
     .WithReference(messagesApi)
     .WithReference(realtimeApi)

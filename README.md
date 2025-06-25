@@ -1,8 +1,36 @@
+<h1 align="center">
+  <br>
+    Chat Service - A .NET Aspire & Dapr demo
+  <br>
+</h1>
+
+<h4 align="center">This is a chat service with a tiny front-end orchestrated with .NET Aspire and supported by Dapr for demo purposes.</h4>
+
+<div align="center">
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/nikneem/aspire-dapr-chat-service-demo)
+![GitHub License](https://img.shields.io/github/license/nikneem/aspire-dapr-chat-service-demo)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=bugs)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
+
+<a href="#architecture">Architecture</a> •
+<a href="#technology">Technology</a> •
+<a href="#prerequisites">Prerequisites</a> •
+<a href="#monitoring">Monitoring</a> •
+<a href="#endpoints">Endpoints</a> •
+<a href="#contributing">Contributing</a> •
+<a href="#license">License</a> •
+<a href="#support">Support</a>
+
+</div>
+
 # Aspire Dapr Chat Service Demo
 
 A distributed chat application backend built with .NET 9, ASP.NET Core, .NET Aspire, and Dapr. This demonstration showcases event-driven microservices architecture with real-time messaging capabilities.
 
-## Architecture Overview
+## Architecture
 
 The application consists of four main components:
 
@@ -13,7 +41,7 @@ The application consists of four main components:
 
 All services are orchestrated using .NET Aspire and communicate through Dapr pub/sub messaging patterns.
 
-## Technology Stack
+## Technology
 
 - **.NET 9**: Latest .NET version for all projects
 - **ASP.NET Core Web APIs**: RESTful service endpoints
@@ -33,16 +61,6 @@ Before running the application, ensure you have the following installed:
 4. **Docker Desktop**: Required for Redis and Azurite containers
 5. **Dapr CLI**: Install from [https://docs.dapr.io/getting-started/install-dapr-cli/](https://docs.dapr.io/getting-started/install-dapr-cli/)
 6. **Visual Studio 2022** or **Visual Studio Code** (recommended)
-
-### Installing Dapr
-
-```powershell
-# Install Dapr CLI
-powershell -Command "iwr -useb https://raw.githubusercontent.com/dapr/cli/master/install/install.ps1 | iex"
-
-# Initialize Dapr (this will install Docker containers for Redis, Zipkin, and Placement service)
-dapr init
-```
 
 ## Getting Started
 
@@ -78,7 +96,7 @@ Once running, you'll have access to:
 - **Messages API**: `http://localhost:5227`
 - **Realtime API**: `http://localhost:5206`
 
-## API Endpoints
+## Endpoints
 
 ### Members API (`localhost:5129`)
 
@@ -177,7 +195,7 @@ src/
     └── HexMaster.Chat.Shared/                   # Common models and utilities
 ```
 
-## Monitoring and Observability
+## Monitoring
 
 ### Aspire Dashboard
 

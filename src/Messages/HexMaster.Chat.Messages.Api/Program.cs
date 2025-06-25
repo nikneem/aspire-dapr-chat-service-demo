@@ -73,4 +73,4 @@ app.MapGet("/messages/history", async (
     return Results.Ok(messages);
 });
 
-app.Run();
+await app.RunAsync();

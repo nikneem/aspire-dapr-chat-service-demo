@@ -1,6 +1,9 @@
-using HexMaster.Chat.Members.Api.Services;
+using HexMaster.Chat.Members.Abstractions.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace HexMaster.Chat.Members.Api.BackgroundServices;
+namespace HexMaster.Chat.Members.BackgroundServices;
 
 public class MemberCleanupService : BackgroundService
 {

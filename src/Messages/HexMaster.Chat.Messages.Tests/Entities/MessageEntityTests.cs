@@ -1,5 +1,5 @@
 using Azure;
-using HexMaster.Chat.Messages.Api.Entities;
+using HexMaster.Chat.Messages.Entities;
 
 namespace HexMaster.Chat.Messages.Tests.Entities;
 

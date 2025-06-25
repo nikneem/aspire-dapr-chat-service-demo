@@ -1,20 +1,12 @@
 using Dapr.Client;
-using HexMaster.Chat.Members.Api.Entities;
-using HexMaster.Chat.Members.Api.Repositories;
+using HexMaster.Chat.Members.Abstractions.DTOs;
+using HexMaster.Chat.Members.Abstractions.Events;
+using HexMaster.Chat.Members.Abstractions.Interfaces;
+using HexMaster.Chat.Members.Abstractions.Requests;
 using HexMaster.Chat.Shared.Constants;
-using HexMaster.Chat.Shared.Events;
-using HexMaster.Chat.Shared.Models;
-using HexMaster.Chat.Shared.Requests;
+using Microsoft.Extensions.Logging;
 
-namespace HexMaster.Chat.Members.Api.Services;
-
-public interface IMemberService
-{
-    Task<ChatMember> RegisterMemberAsync(RegisterMemberRequest request);
-    Task<ChatMember?> GetMemberAsync(string id);
-    Task UpdateLastActivityAsync(string id);
-    Task RemoveInactiveMembersAsync();
-}
+namespace HexMaster.Chat.Members.Services;
 
 public class MemberService : IMemberService
 {
@@ -32,12 +24,12 @@ public class MemberService : IMemberService
         _logger = logger;
     }
 
-    public async Task<ChatMember> RegisterMemberAsync(RegisterMemberRequest request)
+    public async Task<ChatMemberDto> RegisterMemberAsync(RegisterMemberRequest request)
     {
         var memberId = Guid.NewGuid().ToString();
         var now = DateTime.UtcNow;
 
-        var memberEntity = new MemberEntity
+        var memberEntity = new MemberEntityDto
         {
             RowKey = memberId,
             Name = request.Name,
@@ -65,7 +57,7 @@ public class MemberService : IMemberService
 
         _logger.LogInformation("Member {MemberId} registered: {MemberName}", memberId, request.Name);
 
-        return new ChatMember
+        return new ChatMemberDto
         {
             Id = memberId,
             Name = request.Name,
@@ -76,13 +68,13 @@ public class MemberService : IMemberService
         };
     }
 
-    public async Task<ChatMember?> GetMemberAsync(string id)
+    public async Task<ChatMemberDto?> GetMemberAsync(string id)
     {
         var memberEntity = await _repository.GetByIdAsync(id);
         if (memberEntity == null)
             return null;
 
-        return new ChatMember
+        return new ChatMemberDto
         {
             Id = memberEntity.RowKey,
             Name = memberEntity.Name,
@@ -98,8 +90,8 @@ public class MemberService : IMemberService
         var memberEntity = await _repository.GetByIdAsync(id);
         if (memberEntity != null)
         {
-            memberEntity.LastActivityAt = DateTime.UtcNow;
-            await _repository.UpdateAsync(memberEntity);
+            var updatedEntity = memberEntity with { LastActivityAt = DateTime.UtcNow };
+            await _repository.UpdateAsync(updatedEntity);
         }
     }
 

@@ -1,7 +1,7 @@
 using Azure;
 using Azure.Data.Tables;
 
-namespace HexMaster.Chat.Messages.Api.Entities;
+namespace HexMaster.Chat.Messages.Entities;
 
 public class MessageEntity : ITableEntity
 {

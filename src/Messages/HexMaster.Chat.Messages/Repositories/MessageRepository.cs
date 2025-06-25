@@ -1,19 +1,11 @@
 using Azure;
 using Azure.Data.Tables;
-using HexMaster.Chat.Messages.Api.Entities;
+using HexMaster.Chat.Messages.Entities;
+using HexMaster.Chat.Messages.Abstractions.DTOs;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
 using HexMaster.Chat.Shared.Constants;
 
-namespace HexMaster.Chat.Messages.Api.Repositories;
-
-public interface IMessageRepository
-{
-    Task<MessageEntity> CreateAsync(MessageEntity message);
-    Task<IEnumerable<MessageEntity>> GetRecentMessagesAsync(int count = 50);
-    Task<IEnumerable<MessageEntity>> GetMessagesByDateRangeAsync(DateTime from, DateTime to);
-    Task<IEnumerable<MessageEntity>> GetExpiredMessagesAsync(DateTime cutoffTime);
-    Task DeleteAsync(string id);
-    Task DeleteBatchAsync(IEnumerable<string> ids);
-}
+namespace HexMaster.Chat.Messages.Repositories;
 
 public class MessageRepository : IMessageRepository
 {
@@ -25,15 +17,16 @@ public class MessageRepository : IMessageRepository
         _tableClient.CreateIfNotExists();
     }
 
-    public async Task<MessageEntity> CreateAsync(MessageEntity message)
+    public async Task<MessageEntityDto> CreateAsync(MessageEntityDto message)
     {
-        await _tableClient.AddEntityAsync(message);
-        return message;
+        var entity = MapToEntity(message);
+        await _tableClient.AddEntityAsync(entity);
+        return MapToDto(entity);
     }
 
-    public async Task<IEnumerable<MessageEntity>> GetRecentMessagesAsync(int count = 50)
+    public async Task<IEnumerable<MessageEntityDto>> GetRecentMessagesAsync(int count = 50)
     {
-        var entities = new List<MessageEntity>();
+        var entities = new List<MessageEntityDto>();
         var query = _tableClient.QueryAsync<MessageEntity>(
             maxPerPage: count,
             select: null
@@ -41,7 +34,7 @@ public class MessageRepository : IMessageRepository
 
         await foreach (var entity in query)
         {
-            entities.Add(entity);
+            entities.Add(MapToDto(entity));
             if (entities.Count >= count)
                 break;
         }
@@ -50,27 +43,27 @@ public class MessageRepository : IMessageRepository
         return latestMessages.OrderBy(x => x.SentAt);
     }
 
-    public async Task<IEnumerable<MessageEntity>> GetMessagesByDateRangeAsync(DateTime from, DateTime to)
+    public async Task<IEnumerable<MessageEntityDto>> GetMessagesByDateRangeAsync(DateTime from, DateTime to)
     {
         var filter = $"SentAt ge datetime'{from:yyyy-MM-ddTHH:mm:ssZ}' and SentAt le datetime'{to:yyyy-MM-ddTHH:mm:ssZ}'";
-        var entities = new List<MessageEntity>();
+        var entities = new List<MessageEntityDto>();
 
         await foreach (var entity in _tableClient.QueryAsync<MessageEntity>(filter))
         {
-            entities.Add(entity);
+            entities.Add(MapToDto(entity));
         }
 
         return entities.OrderBy(x => x.SentAt);
     }
 
-    public async Task<IEnumerable<MessageEntity>> GetExpiredMessagesAsync(DateTime cutoffTime)
+    public async Task<IEnumerable<MessageEntityDto>> GetExpiredMessagesAsync(DateTime cutoffTime)
     {
         var filter = $"SentAt lt datetime'{cutoffTime:yyyy-MM-ddTHH:mm:ssZ}'";
-        var entities = new List<MessageEntity>();
+        var entities = new List<MessageEntityDto>();
 
         await foreach (var entity in _tableClient.QueryAsync<MessageEntity>(filter))
         {
-            entities.Add(entity);
+            entities.Add(MapToDto(entity));
         }
 
         return entities;
@@ -104,5 +97,37 @@ public class MessageRepository : IMessageRepository
                 Console.WriteLine($"Failed to delete batch: {ex.Message}");
             }
         }
+    }
+
+    private static MessageEntity MapToEntity(MessageEntityDto dto)
+    {
+        return new MessageEntity
+        {
+            PartitionKey = dto.PartitionKey,
+            RowKey = dto.RowKey,
+            Timestamp = dto.Timestamp,
+            ETag = dto.ETag,
+            Content = dto.Content,
+            SenderId = dto.SenderId,
+            SenderName = dto.SenderName,
+            SentAt = dto.SentAt,
+            MessageType = (int)dto.Type
+        };
+    }
+
+    private static MessageEntityDto MapToDto(MessageEntity entity)
+    {
+        return new MessageEntityDto
+        {
+            PartitionKey = entity.PartitionKey,
+            RowKey = entity.RowKey,
+            Timestamp = entity.Timestamp,
+            ETag = entity.ETag,
+            Content = entity.Content,
+            SenderId = entity.SenderId,
+            SenderName = entity.SenderName,
+            SentAt = entity.SentAt,
+            Type = (MessageType)entity.MessageType
+        };
     }
 }

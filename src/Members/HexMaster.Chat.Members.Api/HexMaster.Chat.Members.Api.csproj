@@ -12,7 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference
+      Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference
+      Include="..\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
+    <ProjectReference Include="..\HexMaster.Chat.Members\HexMaster.Chat.Members.csproj" />
     <ProjectReference Include="..\..\Shared\HexMaster.Chat.Shared\HexMaster.Chat.Shared.csproj" />
   </ItemGroup>
 

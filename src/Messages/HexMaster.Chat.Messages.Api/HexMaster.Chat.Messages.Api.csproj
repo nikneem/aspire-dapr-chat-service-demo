@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\Shared\HexMaster.Chat.Shared\HexMaster.Chat.Shared.csproj" />
+    <ProjectReference Include="..\HexMaster.Chat.Messages\HexMaster.Chat.Messages.csproj" />
   </ItemGroup>
 
 </Project>

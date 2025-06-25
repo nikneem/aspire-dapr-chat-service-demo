@@ -1,7 +1,6 @@
-using HexMaster.Chat.Messages.Api.BackgroundServices;
-using HexMaster.Chat.Messages.Api.Repositories;
-using HexMaster.Chat.Messages.Api.Services;
-using HexMaster.Chat.Shared.Requests;
+using HexMaster.Chat.Messages.Extensions;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Messages.Abstractions.Requests;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,16 +9,13 @@ builder.AddServiceDefaults();
 // Add Azure Table Storage
 builder.AddAzureTableClient("tables");
 
+// Add Messages services
+builder.AddChatMessages();
+
 // Add controllers for Dapr event handling
 builder.Services.AddControllers().AddDapr();
 
-// Add services
-builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<IMessageService, MessageService>();
-builder.Services.AddScoped<IMemberStateService, MemberStateService>();
 
-// Add background services
-builder.Services.AddHostedService<MessageCleanupService>();
 
 // Add CORS
 builder.Services.AddCors(options =>

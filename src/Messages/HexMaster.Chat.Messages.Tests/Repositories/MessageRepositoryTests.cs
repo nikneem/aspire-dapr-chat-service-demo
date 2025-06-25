@@ -1,7 +1,8 @@
 using Azure;
 using Azure.Data.Tables;
-using HexMaster.Chat.Messages.Api.Entities;
-using HexMaster.Chat.Messages.Api.Repositories;
+using HexMaster.Chat.Messages.Entities;
+using HexMaster.Chat.Messages.Repositories;
+using HexMaster.Chat.Messages.Abstractions.DTOs;
 using Moq;
 
 namespace HexMaster.Chat.Messages.Tests.Repositories;
@@ -28,7 +29,7 @@ public class MessageRepositoryTests
     public async Task CreateAsync_ShouldCallAddEntityAndReturnMessage()
     {
         // Arrange
-        var messageEntity = new MessageEntity
+        var messageEntityDto = new MessageEntityDto
         {
             RowKey = "msg-123",
             Content = "Test message",
@@ -38,15 +39,18 @@ public class MessageRepositoryTests
 
         var response = Mock.Of<Response>();
         _mockTableClient
-            .Setup(x => x.AddEntityAsync(messageEntity, default))
+            .Setup(x => x.AddEntityAsync(It.IsAny<MessageEntity>(), default))
             .ReturnsAsync(response);
 
         // Act
-        var result = await _repository.CreateAsync(messageEntity);
+        var result = await _repository.CreateAsync(messageEntityDto);
 
         // Assert
-        Assert.Equal(messageEntity, result);
-        _mockTableClient.Verify(x => x.AddEntityAsync(messageEntity, default), Times.Once);
+        Assert.Equal(messageEntityDto.RowKey, result.RowKey);
+        Assert.Equal(messageEntityDto.Content, result.Content);
+        Assert.Equal(messageEntityDto.SenderId, result.SenderId);
+        Assert.Equal(messageEntityDto.SenderName, result.SenderName);
+        _mockTableClient.Verify(x => x.AddEntityAsync(It.IsAny<MessageEntity>(), default), Times.Once);
     }
 
     [Fact]

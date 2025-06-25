@@ -1,11 +1,10 @@
 using Dapr.Client;
-using HexMaster.Chat.Messages.Api.Entities;
-using HexMaster.Chat.Messages.Api.Repositories;
-using HexMaster.Chat.Messages.Api.Services;
+using HexMaster.Chat.Messages.Abstractions.DTOs;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Messages.Abstractions.Requests;
+using HexMaster.Chat.Messages.Services;
 using HexMaster.Chat.Shared.Constants;
 using HexMaster.Chat.Shared.Events;
-using HexMaster.Chat.Shared.Models;
-using HexMaster.Chat.Shared.Requests;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -48,8 +47,8 @@ public class MessageServiceTests
             .ReturnsAsync("Test User");
 
         _mockRepository
-            .Setup(x => x.CreateAsync(It.IsAny<MessageEntity>()))
-            .ReturnsAsync((MessageEntity entity) => entity);
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ReturnsAsync((MessageEntityDto entity) => entity);
 
         _mockDaprClient
             .Setup(x => x.PublishEventAsync(
@@ -74,7 +73,7 @@ public class MessageServiceTests
         Assert.Equal(MessageType.Text, result.Type);
         Assert.False(string.IsNullOrEmpty(result.Id));
 
-        _mockRepository.Verify(x => x.CreateAsync(It.Is<MessageEntity>(
+        _mockRepository.Verify(x => x.CreateAsync(It.Is<MessageEntityDto>(
             m => m.Content == "Hello, world!" &&
                  m.SenderId == "sender-123" &&
                  m.SenderName == "Test User")), Times.Once);
@@ -151,8 +150,8 @@ public class MessageServiceTests
             .ReturnsAsync((string?)null);
 
         _mockRepository
-            .Setup(x => x.CreateAsync(It.IsAny<MessageEntity>()))
-            .ReturnsAsync((MessageEntity entity) => entity);
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ReturnsAsync((MessageEntityDto entity) => entity);
 
         _mockDaprClient
             .Setup(x => x.PublishEventAsync(
@@ -194,8 +193,8 @@ public class MessageServiceTests
             .ReturnsAsync("Test User");
 
         _mockRepository
-            .Setup(x => x.CreateAsync(It.IsAny<MessageEntity>()))
-            .ReturnsAsync((MessageEntity entity) => entity);
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ReturnsAsync((MessageEntityDto entity) => entity);
 
         _mockDaprClient
             .Setup(x => x.PublishEventAsync(
@@ -220,7 +219,7 @@ public class MessageServiceTests
     public async Task GetRecentMessagesAsync_ShouldReturnMappedMessages()
     {
         // Arrange
-        var messageEntities = new List<MessageEntity>
+        var messageEntities = new List<MessageEntityDto>
         {
             new()
             {
@@ -229,7 +228,7 @@ public class MessageServiceTests
                 SenderId = "sender1",
                 SenderName = "User 1",
                 SentAt = DateTime.UtcNow.AddMinutes(-5),
-                MessageType = (int)MessageType.Text
+                Type = MessageType.Text
             },
             new()
             {
@@ -238,7 +237,7 @@ public class MessageServiceTests
                 SenderId = "sender2",
                 SenderName = "User 2",
                 SentAt = DateTime.UtcNow.AddMinutes(-3),
-                MessageType = (int)MessageType.Text
+                Type = MessageType.Text
             }
         };
 
@@ -261,7 +260,7 @@ public class MessageServiceTests
         // Arrange
         var from = DateTime.UtcNow.AddHours(-2);
         var to = DateTime.UtcNow;
-        var messageEntities = new List<MessageEntity>
+        var messageEntities = new List<MessageEntityDto>
         {
             new()
             {
@@ -270,7 +269,7 @@ public class MessageServiceTests
                 SenderId = "sender1",
                 SenderName = "User 1",
                 SentAt = from.AddMinutes(30),
-                MessageType = (int)MessageType.Text
+                Type = MessageType.Text
             }
         };
 
@@ -292,7 +291,7 @@ public class MessageServiceTests
     {
         // Arrange
         var cutoffTime = DateTime.UtcNow.AddHours(-24);
-        var expiredMessages = new List<MessageEntity>
+        var expiredMessages = new List<MessageEntityDto>
         {
             new() { RowKey = "expired1" },
             new() { RowKey = "expired2" },
@@ -324,7 +323,7 @@ public class MessageServiceTests
         // Arrange
         _mockRepository
             .Setup(x => x.GetExpiredMessagesAsync(It.IsAny<DateTime>()))
-            .ReturnsAsync(new List<MessageEntity>());
+            .ReturnsAsync(new List<MessageEntityDto>());
 
         // Act
         await _service.RemoveExpiredMessagesAsync();

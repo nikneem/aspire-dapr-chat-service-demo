@@ -1,10 +1,10 @@
 using Dapr.Client;
-using HexMaster.Chat.Members.Api.Entities;
-using HexMaster.Chat.Members.Api.Repositories;
-using HexMaster.Chat.Members.Api.Services;
+using HexMaster.Chat.Members.Abstractions.DTOs;
+using HexMaster.Chat.Members.Abstractions.Events;
+using HexMaster.Chat.Members.Abstractions.Interfaces;
+using HexMaster.Chat.Members.Abstractions.Requests;
+using HexMaster.Chat.Members.Services;
 using HexMaster.Chat.Shared.Constants;
-using HexMaster.Chat.Shared.Events;
-using HexMaster.Chat.Shared.Requests;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -37,8 +37,8 @@ public class MemberServiceTests
         };
 
         _mockRepository
-            .Setup(x => x.CreateAsync(It.IsAny<MemberEntity>()))
-            .ReturnsAsync((MemberEntity entity) => entity);
+            .Setup(x => x.CreateAsync(It.IsAny<MemberEntityDto>()))
+            .ReturnsAsync((MemberEntityDto entity) => entity);
 
         _mockDaprClient
             .Setup(x => x.PublishEventAsync(
@@ -58,7 +58,7 @@ public class MemberServiceTests
         Assert.True(result.IsActive);
         Assert.False(string.IsNullOrEmpty(result.Id));
 
-        _mockRepository.Verify(x => x.CreateAsync(It.Is<MemberEntity>(
+        _mockRepository.Verify(x => x.CreateAsync(It.Is<MemberEntityDto>(
             m => m.Name == "Test User" &&
                  m.Email == "test@example.com" &&
                  m.IsActive == true)), Times.Once);
@@ -68,7 +68,9 @@ public class MemberServiceTests
             Topics.MemberJoined,
             It.Is<MemberJoinedEvent>(e =>
                 e.Name == "Test User" &&
-                e.Email == "test@example.com"),
+                e.Email == "test@example.com" &&
+                !string.IsNullOrEmpty(e.Id) &&
+                e.JoinedAt > DateTime.MinValue),
             default), Times.Once);
     }
 
@@ -77,7 +79,7 @@ public class MemberServiceTests
     {
         // Arrange
         var memberId = "test-id";
-        var memberEntity = new MemberEntity
+        var memberEntityDto = new MemberEntityDto
         {
             RowKey = memberId,
             Name = "Test User",
@@ -89,7 +91,7 @@ public class MemberServiceTests
 
         _mockRepository
             .Setup(x => x.GetByIdAsync(memberId))
-            .ReturnsAsync(memberEntity);
+            .ReturnsAsync(memberEntityDto);
 
         // Act
         var result = await _service.GetMemberAsync(memberId);
@@ -110,7 +112,7 @@ public class MemberServiceTests
 
         _mockRepository
             .Setup(x => x.GetByIdAsync(memberId))
-            .ReturnsAsync((MemberEntity?)null);
+            .ReturnsAsync((MemberEntityDto?)null);
 
         // Act
         var result = await _service.GetMemberAsync(memberId);
@@ -124,7 +126,7 @@ public class MemberServiceTests
     {
         // Arrange
         var memberId = "test-id";
-        var memberEntity = new MemberEntity
+        var memberEntity = new MemberEntityDto
         {
             RowKey = memberId,
             Name = "Test User",
@@ -138,14 +140,14 @@ public class MemberServiceTests
             .ReturnsAsync(memberEntity);
 
         _mockRepository
-            .Setup(x => x.UpdateAsync(It.IsAny<MemberEntity>()))
-            .ReturnsAsync((MemberEntity entity) => entity);
+            .Setup(x => x.UpdateAsync(It.IsAny<MemberEntityDto>()))
+            .ReturnsAsync((MemberEntityDto entity) => entity);
 
         // Act
         await _service.UpdateLastActivityAsync(memberId);
 
         // Assert
-        _mockRepository.Verify(x => x.UpdateAsync(It.Is<MemberEntity>(
+        _mockRepository.Verify(x => x.UpdateAsync(It.Is<MemberEntityDto>(
             m => m.RowKey == memberId &&
                  m.LastActivityAt > DateTime.UtcNow.AddMinutes(-1))), Times.Once);
     }
@@ -158,13 +160,13 @@ public class MemberServiceTests
 
         _mockRepository
             .Setup(x => x.GetByIdAsync(memberId))
-            .ReturnsAsync((MemberEntity?)null);
+            .ReturnsAsync((MemberEntityDto?)null);
 
         // Act
         await _service.UpdateLastActivityAsync(memberId);
 
         // Assert
-        _mockRepository.Verify(x => x.UpdateAsync(It.IsAny<MemberEntity>()), Times.Never);
+        _mockRepository.Verify(x => x.UpdateAsync(It.IsAny<MemberEntityDto>()), Times.Never);
     }
 
     [Fact]
@@ -172,7 +174,7 @@ public class MemberServiceTests
     {
         // Arrange
         var cutoffTime = DateTime.UtcNow.AddHours(-1);
-        var inactiveMembers = new List<MemberEntity>
+        var inactiveMembers = new List<MemberEntityDto>
         {
             new() { RowKey = "inactive1", Name = "Inactive User 1", LastActivityAt = cutoffTime.AddMinutes(-30) },
             new() { RowKey = "inactive2", Name = "Inactive User 2", LastActivityAt = cutoffTime.AddMinutes(-45) }
@@ -204,13 +206,13 @@ public class MemberServiceTests
         _mockDaprClient.Verify(x => x.PublishEventAsync(
             DaprComponents.PubSubName,
             Topics.MemberLeft,
-            It.Is<MemberLeftEvent>(e => e.Id == "inactive1" && e.Name == "Inactive User 1"),
+            It.Is<MemberLeftEvent>(e => e.Id == "inactive1" && e.Name == "Inactive User 1" && e.LeftAt > DateTime.MinValue),
             default), Times.Once);
 
         _mockDaprClient.Verify(x => x.PublishEventAsync(
             DaprComponents.PubSubName,
             Topics.MemberLeft,
-            It.Is<MemberLeftEvent>(e => e.Id == "inactive2" && e.Name == "Inactive User 2"),
+            It.Is<MemberLeftEvent>(e => e.Id == "inactive2" && e.Name == "Inactive User 2" && e.LeftAt > DateTime.MinValue),
             default), Times.Once);
     }
 
@@ -220,7 +222,7 @@ public class MemberServiceTests
         // Arrange
         _mockRepository
             .Setup(x => x.GetInactiveMembersAsync(It.IsAny<DateTime>()))
-            .ReturnsAsync(new List<MemberEntity>());
+            .ReturnsAsync(new List<MemberEntityDto>());
 
         // Act
         await _service.RemoveInactiveMembersAsync();

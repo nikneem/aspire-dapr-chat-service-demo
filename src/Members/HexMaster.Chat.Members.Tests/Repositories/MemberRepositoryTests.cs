@@ -1,7 +1,8 @@
 using Azure;
 using Azure.Data.Tables;
-using HexMaster.Chat.Members.Api.Entities;
-using HexMaster.Chat.Members.Api.Repositories;
+using HexMaster.Chat.Members.Abstractions.DTOs;
+using HexMaster.Chat.Members.Entities;
+using HexMaster.Chat.Members.Repositories;
 using Moq;
 
 namespace HexMaster.Chat.Members.Tests.Repositories;
@@ -73,7 +74,7 @@ public class MemberRepositoryTests
     public async Task CreateAsync_ShouldCallAddEntityAndReturnMember()
     {
         // Arrange
-        var memberEntity = new MemberEntity
+        var memberEntityDto = new MemberEntityDto
         {
             RowKey = "test-id",
             Name = "Test User",
@@ -82,22 +83,24 @@ public class MemberRepositoryTests
 
         var response = Mock.Of<Response>();
         _mockTableClient
-            .Setup(x => x.AddEntityAsync(memberEntity, default))
+            .Setup(x => x.AddEntityAsync(It.IsAny<MemberEntity>(), default))
             .ReturnsAsync(response);
 
         // Act
-        var result = await _repository.CreateAsync(memberEntity);
+        var result = await _repository.CreateAsync(memberEntityDto);
 
         // Assert
-        Assert.Equal(memberEntity, result);
-        _mockTableClient.Verify(x => x.AddEntityAsync(memberEntity, default), Times.Once);
+        Assert.Equal(memberEntityDto.RowKey, result.RowKey);
+        Assert.Equal(memberEntityDto.Name, result.Name);
+        Assert.Equal(memberEntityDto.Email, result.Email);
+        _mockTableClient.Verify(x => x.AddEntityAsync(It.IsAny<MemberEntity>(), default), Times.Once);
     }
 
     [Fact]
     public async Task UpdateAsync_ShouldCallUpdateEntityAndReturnMember()
     {
         // Arrange
-        var memberEntity = new MemberEntity
+        var memberEntityDto = new MemberEntityDto
         {
             RowKey = "test-id",
             Name = "Updated User",
@@ -107,15 +110,17 @@ public class MemberRepositoryTests
 
         var response = Mock.Of<Response>();
         _mockTableClient
-            .Setup(x => x.UpdateEntityAsync(memberEntity, memberEntity.ETag, TableUpdateMode.Merge, default))
+            .Setup(x => x.UpdateEntityAsync(It.IsAny<MemberEntity>(), It.IsAny<ETag>(), TableUpdateMode.Merge, default))
             .ReturnsAsync(response);
 
         // Act
-        var result = await _repository.UpdateAsync(memberEntity);
+        var result = await _repository.UpdateAsync(memberEntityDto);
 
         // Assert
-        Assert.Equal(memberEntity, result);
-        _mockTableClient.Verify(x => x.UpdateEntityAsync(memberEntity, memberEntity.ETag, TableUpdateMode.Merge, default), Times.Once);
+        Assert.Equal(memberEntityDto.RowKey, result.RowKey);
+        Assert.Equal(memberEntityDto.Name, result.Name);
+        Assert.Equal(memberEntityDto.Email, result.Email);
+        _mockTableClient.Verify(x => x.UpdateEntityAsync(It.IsAny<MemberEntity>(), It.IsAny<ETag>(), TableUpdateMode.Merge, default), Times.Once);
     }
 
     [Fact]

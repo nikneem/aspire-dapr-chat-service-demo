@@ -1,7 +1,7 @@
 using Dapr;
-using HexMaster.Chat.Messages.Api.Services;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Members.Abstractions.Events;
 using HexMaster.Chat.Shared.Constants;
-using HexMaster.Chat.Shared.Events;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HexMaster.Chat.Messages.Api.Controllers;

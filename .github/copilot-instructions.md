@@ -31,6 +31,8 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Manage member profiles and status
 - Store member data in Azure Table Storage
 - Publish member events via Dapr pub/sub
+- **Abstractions project** (`HexMaster.Chat.Members.Abstractions`): Contains interfaces, DTOs, events, and request models
+- **Implementation project** (`HexMaster.Chat.Members`): Contains concrete implementations, entities, and dependency injection setup
 
 ### Messages API (`HexMaster.Chat.Messages.Api`)
 
@@ -38,6 +40,8 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Store messages in Azure Table Storage
 - Publish message events via Dapr pub/sub
 - Handle message history retrieval
+- **Abstractions project** (`HexMaster.Chat.Messages.Abstractions`): Contains interfaces, DTOs, events, and request models
+- **Implementation project** (`HexMaster.Chat.Messages`): Contains concrete implementations, entities, controllers, and dependency injection setup
 
 ### Realtime API (`HexMaster.Chat.Realtime.Api`)
 
@@ -73,27 +77,49 @@ src/
 │   ├── Dockerfile                              # Container configuration
 │   └── README.md                               # Client documentation
 ├── Members/
-│   └── HexMaster.Chat.Members.Api/             # Member management service
-│       ├── BackgroundServices/
-│       │   └── MemberCleanupService.cs         # Inactive member cleanup
-│       ├── Entities/
-│       │   └── MemberEntity.cs                 # Member data model
-│       ├── Repositories/
-│       │   └── MemberRepository.cs             # Data access layer
-│       ├── Services/
-│       │   └── MemberService.cs                # Business logic
-│       └── Program.cs                          # Service configuration
+│   ├── HexMaster.Chat.Members.Abstractions/    # Member service contracts
+│   │   ├── DTOs/                               # Data transfer objects
+│   │   ├── Events/                             # Member-specific events
+│   │   ├── Interfaces/                         # Service and repository interfaces
+│   │   └── Requests/                           # Member-specific request models
+│   ├── HexMaster.Chat.Members/                 # Member service implementation
+│   │   ├── Entities/
+│   │   │   └── MemberEntity.cs                 # Member data model
+│   │   ├── Repositories/
+│   │   │   └── MemberRepository.cs             # Data access implementation
+│   │   ├── Services/
+│   │   │   └── MemberService.cs                # Business logic implementation
+│   │   ├── BackgroundServices/
+│   │   │   └── MemberCleanupService.cs         # Inactive member cleanup
+│   │   └── Extensions/
+│   │       └── ServiceCollectionExtensions.cs  # Dependency injection setup
+│   ├── HexMaster.Chat.Members.Api/             # Member API host
+│   │   ├── Program.cs                          # Service configuration
+│   │   └── appsettings.json                    # API-specific settings
+│   └── HexMaster.Chat.Members.Tests/           # Member service tests
 ├── Messages/
-│   └── HexMaster.Chat.Messages.Api/            # Message handling service
-│       ├── BackgroundServices/
-│       │   └── MessageCleanupService.cs        # Message retention
-│       ├── Entities/
-│       │   └── MessageEntity.cs                # Message data model
-│       ├── Repositories/
-│       │   └── MessageRepository.cs            # Data access layer
-│       ├── Services/
-│       │   └── MessageService.cs               # Business logic
-│       └── Program.cs                          # Service configuration
+│   ├── HexMaster.Chat.Messages.Abstractions/   # Message service contracts
+│   │   ├── DTOs/                               # Data transfer objects
+│   │   ├── Events/                             # Message-specific events
+│   │   ├── Interfaces/                         # Service and repository interfaces
+│   │   └── Requests/                           # Message-specific request models
+│   ├── HexMaster.Chat.Messages/                # Message service implementation
+│   │   ├── Entities/
+│   │   │   └── MessageEntity.cs                # Message data model
+│   │   ├── Repositories/
+│   │   │   └── MessageRepository.cs            # Data access implementation
+│   │   ├── Services/
+│   │   │   ├── MessageService.cs               # Business logic implementation
+│   │   │   └── MemberStateService.cs           # Member state management
+│   │   ├── BackgroundServices/
+│   │   │   └── MessageCleanupService.cs        # Message retention
+│   │   ├── Controllers/                        # Dapr event controllers
+│   │   └── Extensions/
+│   │       └── ServiceCollectionExtensions.cs  # Dependency injection setup
+│   ├── HexMaster.Chat.Messages.Api/            # Message API host
+│   │   ├── Program.cs                          # Service configuration
+│   │   └── appsettings.json                    # API-specific settings
+│   └── HexMaster.Chat.Messages.Tests/          # Message service tests
 ├── Realtime/
 │   └── HexMaster.Chat.Realtime.Api/            # SignalR service
 │       ├── Controllers/                        # Dapr event controllers
@@ -119,6 +145,14 @@ src/
 - Use minimal APIs where appropriate
 - Implement proper async/await patterns
 - Use record types for DTOs and value objects
+
+### Project Separation
+
+- **Abstractions projects**: Define contracts, interfaces, DTOs, events, and request models
+- **Implementation projects**: Contain concrete implementations, entities, repositories, services, and background services
+- **API projects**: Host the services and define endpoints, reference both abstractions and implementation projects
+- Use extension methods in implementation projects for dependency injection (e.g., `builder.AddChatMembers()`)
+- Keep abstractions lightweight with minimal dependencies
 
 ### Error Handling
 

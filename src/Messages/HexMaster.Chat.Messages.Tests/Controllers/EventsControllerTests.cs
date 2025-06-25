@@ -1,6 +1,6 @@
 using HexMaster.Chat.Messages.Api.Controllers;
-using HexMaster.Chat.Messages.Api.Services;
-using HexMaster.Chat.Shared.Events;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Members.Abstractions.Events;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;

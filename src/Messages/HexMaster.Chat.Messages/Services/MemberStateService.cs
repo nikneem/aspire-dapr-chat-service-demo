@@ -1,15 +1,11 @@
 using Dapr.Client;
+using HexMaster.Chat.Messages.Abstractions.DTOs;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Members.Abstractions.Events;
 using HexMaster.Chat.Shared.Constants;
-using HexMaster.Chat.Shared.Events;
+using Microsoft.Extensions.Logging;
 
-namespace HexMaster.Chat.Messages.Api.Services;
-
-public interface IMemberStateService
-{
-    Task StoreMemberAsync(MemberJoinedEvent memberEvent);
-    Task<string?> GetMemberNameAsync(string memberId);
-    Task UpdateMemberActivityAsync(string memberId);
-}
+namespace HexMaster.Chat.Messages.Services;
 
 public class MemberStateService : IMemberStateService
 {
@@ -25,7 +21,7 @@ public class MemberStateService : IMemberStateService
 
     public async Task StoreMemberAsync(MemberJoinedEvent memberEvent)
     {
-        var memberData = new MemberCacheData
+        var memberData = new MemberCacheDataDto
         {
             Id = memberEvent.Id,
             Name = memberEvent.Name,

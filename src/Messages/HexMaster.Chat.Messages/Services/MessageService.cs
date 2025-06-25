@@ -1,21 +1,13 @@
 using Dapr.Client;
-using HexMaster.Chat.Messages.Api.Entities;
-using HexMaster.Chat.Messages.Api.Repositories;
+using HexMaster.Chat.Messages.Abstractions.DTOs;
+using HexMaster.Chat.Messages.Abstractions.Interfaces;
+using HexMaster.Chat.Messages.Abstractions.Requests;
 using HexMaster.Chat.Shared.Constants;
 using HexMaster.Chat.Shared.Events;
-using HexMaster.Chat.Shared.Models;
-using HexMaster.Chat.Shared.Requests;
+using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
-namespace HexMaster.Chat.Messages.Api.Services;
-
-public interface IMessageService
-{
-    Task<ChatMessage> SendMessageAsync(SendMessageRequest request);
-    Task<IEnumerable<ChatMessage>> GetRecentMessagesAsync(int count = 50);
-    Task<IEnumerable<ChatMessage>> GetMessageHistoryAsync(DateTime from, DateTime to);
-    Task RemoveExpiredMessagesAsync();
-}
+namespace HexMaster.Chat.Messages.Services;
 
 public class MessageService : IMessageService
 {
@@ -36,7 +28,7 @@ public class MessageService : IMessageService
         _logger = logger;
     }
 
-    public async Task<ChatMessage> SendMessageAsync(SendMessageRequest request)
+    public async Task<ChatMessageDto> SendMessageAsync(SendMessageRequest request)
     {
         // Validate message content
         if (string.IsNullOrWhiteSpace(request.Content))
@@ -69,17 +61,17 @@ public class MessageService : IMessageService
         var messageId = Guid.NewGuid().ToString();
         var now = DateTime.UtcNow;
 
-        var messageEntity = new MessageEntity
+        var messageDto = new MessageEntityDto
         {
             RowKey = messageId,
             Content = cleanContent,
             SenderId = request.SenderId,
             SenderName = senderName,
             SentAt = now,
-            MessageType = (int)MessageType.Text
+            Type = MessageType.Text
         };
 
-        await _repository.CreateAsync(messageEntity);
+        await _repository.CreateAsync(messageDto);
 
         // Publish message sent event
         var messageSentEvent = new MessageSentEvent
@@ -98,7 +90,7 @@ public class MessageService : IMessageService
 
         _logger.LogInformation("Message {MessageId} sent by {SenderId}", messageId, request.SenderId);
 
-        return new ChatMessage
+        return new ChatMessageDto
         {
             Id = messageId,
             Content = cleanContent,
@@ -109,16 +101,16 @@ public class MessageService : IMessageService
         };
     }
 
-    public async Task<IEnumerable<ChatMessage>> GetRecentMessagesAsync(int count = 50)
+    public async Task<IEnumerable<ChatMessageDto>> GetRecentMessagesAsync(int count = 50)
     {
         var messageEntities = await _repository.GetRecentMessagesAsync(count);
-        return messageEntities.Select(MapToModel);
+        return messageEntities.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<ChatMessage>> GetMessageHistoryAsync(DateTime from, DateTime to)
+    public async Task<IEnumerable<ChatMessageDto>> GetMessageHistoryAsync(DateTime from, DateTime to)
     {
         var messageEntities = await _repository.GetMessagesByDateRangeAsync(from, to);
-        return messageEntities.Select(MapToModel);
+        return messageEntities.Select(MapToDto);
     }
 
     public async Task RemoveExpiredMessagesAsync()
@@ -134,16 +126,16 @@ public class MessageService : IMessageService
         }
     }
 
-    private static ChatMessage MapToModel(MessageEntity entity)
+    private static ChatMessageDto MapToDto(MessageEntityDto entity)
     {
-        return new ChatMessage
+        return new ChatMessageDto
         {
             Id = entity.RowKey,
             Content = entity.Content,
             SenderId = entity.SenderId,
             SenderName = entity.SenderName,
             SentAt = entity.SentAt,
-            Type = (MessageType)entity.MessageType
+            Type = entity.Type
         };
     }
 

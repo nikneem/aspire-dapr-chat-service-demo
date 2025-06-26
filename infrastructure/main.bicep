@@ -10,10 +10,9 @@ param tags object = {}
 param environment string
 
 @description('Application name prefix')
-param appName string = 'hexchat'
+param appName string
 
-var systemName = 'aspirchat'
-var defaultResourceName = '${systemName}-${environment}'
+var defaultResourceName = '${appName}-${environment}'
 var resourceGroupName = '${defaultResourceName}-rg'
 
 // Create Resource Group

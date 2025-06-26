@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 param environment string = 'dev'
 
 @description('Application name prefix')
-param appName string = 'hexchat'
+param appName string
 
 @description('Tags to apply to all resources')
 param tags object = {

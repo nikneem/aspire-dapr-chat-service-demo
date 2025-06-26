@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <ContainerRegistry>hub.docker.com</ContainerRegistry>
-	  <ContainerRepository>aspirichat/members-api</ContainerRepository>
+    <ContainerRegistry>hub.docker.com</ContainerRegistry>
+    <ContainerRepository>cekeilholz/aspirichat-members-api</ContainerRepository>
     <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
     <ContainerUser>app</ContainerUser>
   </PropertyGroup>
@@ -16,10 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
-    <ProjectReference
-      Include="..\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Aspire\HexMaster.Chat.Aspire\HexMaster.Chat.Aspire.ServiceDefaults\HexMaster.Chat.Aspire.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
     <ProjectReference Include="..\HexMaster.Chat.Members\HexMaster.Chat.Members.csproj" />
     <ProjectReference Include="..\..\Shared\HexMaster.Chat.Shared\HexMaster.Chat.Shared.csproj" />
   </ItemGroup>

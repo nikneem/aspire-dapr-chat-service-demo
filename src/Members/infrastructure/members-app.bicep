@@ -4,9 +4,6 @@ param location string = resourceGroup().location
 @description('Environment name (dev, staging, prod)')
 param environment string
 
-@description('Application name prefix')
-param appName string
-
 @description('Container App name')
 param containerAppName string
 

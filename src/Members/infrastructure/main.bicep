@@ -57,7 +57,6 @@ module membersApp 'members-app.bicep' = {
   params: {
     location: location
     environment: environment
-    appName: appName
     containerAppName: containerAppName
     containerAppsEnvironmentId: containerAppsEnvironmentId
     appConfigurationEndpoint: appConfigurationEndpoint

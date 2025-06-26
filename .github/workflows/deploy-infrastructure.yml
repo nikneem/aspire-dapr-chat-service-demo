@@ -21,6 +21,9 @@ on:
           - dev
           - prod
 
+env:
+  AZURE_LOCATION: "North Europe"
+
 permissions:
   id-token: write
   contents: read
@@ -45,14 +48,51 @@ jobs:
           echo "Bicep templates are valid!"
         working-directory: ${{ github.workspace }}
 
-  deploy-dev:
-    name: Deploy to Development
+  prepare-parameters:
+    name: Prepare Deployment Parameters
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate Bicep templates
+        run: |
+          echo "Validating main.bicep template..."
+          az bicep build --file infrastructure/main.bicep
+          
+          echo "Validating resources.bicep template..."
+          az bicep build --file infrastructure/resources.bicep
+
+          echo "Validating dev params..."
+          az bicep build-params --file infrastructure/main.dev.bicepparam --outfile infrastructure/main.dev.generated.json
+          
+          echo "Validating prod params..."
+          az bicep build-params --file infrastructure/main.prod.bicepparam --outfile infrastructure/main.prod.generated.json
+
+          echo "Bicep templates are valid!"
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload Infrastructure Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-files
+          path: |
+            infrastructure/*.json
+            infrastructure/*.bicep
+          retention-days: 30
+
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: [validate, prepare-parameters]
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    steps:
+      - name: Download Infrastructure Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: infrastructure-files
+          path: infrastructure/
 
       - name: Azure CLI Login
         uses: azure/login@v1
@@ -66,9 +106,10 @@ jobs:
         run: |
           echo "Running what-if analysis for development environment..."
           az deployment sub what-if \
-            --location "West Europe" \
-            --template-file infrastructure/main.bicep \
-            --parameters infrastructure/main.dev.bicepparam \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.dev.generated.json \
+            --name "hexchat-dev-whatif-$(date +%Y%m%d-%H%M%S)" \
             --output table
         working-directory: ${{ github.workspace }}
 
@@ -77,9 +118,9 @@ jobs:
         run: |
           echo "Deploying to development environment..."
           az deployment sub create \
-            --location "West Europe" \
-            --template-file infrastructure/main.bicep \
-            --parameters infrastructure/main.dev.bicepparam \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.dev.generated.json \
             --name "hexchat-dev-$(date +%Y%m%d-%H%M%S)" \
             --output json > deployment-output-dev.json
           
@@ -127,11 +168,14 @@ jobs:
 #   deploy-production:
 #     name: Deploy to Production
 #     runs-on: ubuntu-latest
-#     needs: validate
+#     needs: [validate, prepare-parameters]
 #     if: github.ref == 'refs/heads/main' && github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
 #     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+#       - name: Download Infrastructure Artifacts
+#         uses: actions/download-artifact@v4
+#         with:
+#           name: infrastructure-files
+#           path: infrastructure/
 
 #       - name: Azure CLI Login
 #         uses: azure/login@v1
@@ -144,9 +188,10 @@ jobs:
 #         run: |
 #           echo "Running what-if analysis for production environment..."
 #           az deployment sub what-if \
-#             --location "West Europe" \
-#             --template-file infrastructure/main.bicep \
-#             --parameters infrastructure/main.prod.bicepparam \
+#             --location "${{ env.AZURE_LOCATION }}" \
+#             --template-file infrastructure/main.json \
+#             --parameters infrastructure/main.prod.generated.json \
+#             --name "hexchat-prod-whatif-$(date +%Y%m%d-%H%M%S)" \
 #             --output table
 #         working-directory: ${{ github.workspace }}
 
@@ -154,9 +199,9 @@ jobs:
 #         run: |
 #           echo "Deploying to production environment..."
 #           az deployment sub create \
-#             --location "West Europe" \
-#             --template-file infrastructure/main.bicep \
-#             --parameters infrastructure/main.prod.bicepparam \
+#             --location "${{ env.AZURE_LOCATION }}" \
+#             --template-file infrastructure/main.json \
+#             --parameters infrastructure/main.prod.generated.json \
 #             --name "hexchat-prod-$(date +%Y%m%d-%H%M%S)" \
 #             --output json > deployment-output-prod.json
           

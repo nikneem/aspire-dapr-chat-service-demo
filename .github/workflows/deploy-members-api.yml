@@ -126,8 +126,8 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Dotnet Publish Container
-        working-directory: src/Brp/Wigo4it.StubApis.Brp.Api
-        run: dotnet publish --os linux --arch arm64 /t:PublishContainer -p:ContainerImageTag=${{needs.versionize.outputs.semver}} -c Release
+        working-directory: ${{env.API_PROJECT_PATH}}
+        run: dotnet publish --os linux --arch arm64 /t:PublishContainer -p:ContainerImageTag=${{needs.versionize.outputs.assemblySemFileVer}} -c Release
 
 
 

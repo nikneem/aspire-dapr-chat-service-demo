@@ -1,7 +1,7 @@
 using 'main.bicep'
 
 // Development Environment Parameters for Members Service
-param location = 'West Europe'
+param location = 'North Europe'
 param environment = 'dev'
 param appName = 'aspirichat'
 
@@ -17,9 +17,7 @@ param applicationInsightsConnectionString = 'InstrumentationKey={key};IngestionE
 
 // Container configuration
 param containerImageTag = 'latest'
-param containerRegistryServer = '{your-registry}.azurecr.io'
-param containerRegistryUsername = '{registry-username}'
-param containerRegistryPassword = '{registry-password}'
+param containerRegistryServer = 'docker.io'
 
 // Storage configuration
 param tableStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName={storage-account};AccountKey={account-key};EndpointSuffix=core.windows.net'

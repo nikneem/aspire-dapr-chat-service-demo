@@ -25,14 +25,6 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-@description('Container registry username')
-@secure()
-param containerRegistryUsername string
-
-@description('Container registry password')
-@secure()
-param containerRegistryPassword string
-
 @description('Azure Table Storage connection string')
 @secure()
 param tableStorageConnectionString string
@@ -46,7 +38,7 @@ param daprStateStoreComponentName string
 @description('Tags to apply to all resources')
 param tags object = {}
 
-var containerImageName = '${containerRegistryServer}/hexmaster-chat-members-api:${containerImageTag}'
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
 
 // Members API Container App
 resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -59,10 +51,6 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       activeRevisionsMode: 'Single'
       secrets: [
         {
-          name: 'container-registry-password'
-          value: containerRegistryPassword
-        }
-        {
           name: 'table-storage-connection-string'
           value: tableStorageConnectionString
         }
@@ -74,8 +62,6 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       registries: [
         {
           server: containerRegistryServer
-          username: containerRegistryUsername
-          passwordSecretRef: 'container-registry-password'
         }
       ]
       ingress: {

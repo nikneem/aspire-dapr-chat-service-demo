@@ -27,14 +27,6 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-@description('Container registry username')
-@secure()
-param containerRegistryUsername string
-
-@description('Container registry password')
-@secure()
-param containerRegistryPassword string
-
 @description('Azure Table Storage connection string')
 @secure()
 param tableStorageConnectionString string
@@ -72,8 +64,6 @@ module membersApp 'members-app.bicep' = {
     applicationInsightsConnectionString: applicationInsightsConnectionString
     containerImageTag: containerImageTag
     containerRegistryServer: containerRegistryServer
-    containerRegistryUsername: containerRegistryUsername
-    containerRegistryPassword: containerRegistryPassword
     tableStorageConnectionString: tableStorageConnectionString
     daprPubSubComponentName: daprPubSubComponentName
     daprStateStoreComponentName: daprStateStoreComponentName

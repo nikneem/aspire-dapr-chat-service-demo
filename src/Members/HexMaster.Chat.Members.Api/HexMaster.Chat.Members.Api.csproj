@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ContainerRegistry>hub.docker.com</ContainerRegistry>
+    <ContainerRegistry>docker.io</ContainerRegistry>
     <ContainerRepository>cekeilholz/aspirichat-members-api</ContainerRepository>
     <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
     <ContainerUser>app</ContainerUser>

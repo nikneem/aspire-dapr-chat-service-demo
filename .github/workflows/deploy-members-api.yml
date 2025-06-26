@@ -164,7 +164,7 @@ jobs:
   deploy-dev:
     name: Deploy to Development
     runs-on: ubuntu-latest
-    needs: [prepare-infrastructure, versionize]
+    needs: [prepare-infrastructure, versionize, test]
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     steps:
       - name: Download Infrastructure Artifacts

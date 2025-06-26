@@ -7,14 +7,7 @@ param environment string
 @description('Container App name')
 param containerAppName string
 
-@description('Container Apps Environment resource ID')
-param containerAppsEnvironmentId string
-
-@description('App Configuration endpoint')
-param appConfigurationEndpoint string
-
-@description('Application Insights connection string')
-param applicationInsightsConnectionString string
+param applicationLandingZone object
 
 @description('Container image tag or version')
 param containerImageTag string = 'latest'
@@ -22,18 +15,23 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-@description('Azure Table Storage connection string')
-@secure()
-param tableStorageConnectionString string
-
-@description('Dapr pub/sub component name')
-param daprPubSubComponentName string
-
-@description('Dapr state store component name')
-param daprStateStoreComponentName string
-
 @description('Tags to apply to all resources')
 param tags object = {}
+
+
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-02-02-preview' existing = {
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: applicationLandingZone.containerAppsEnvironmentName
+}
+resource azureAppConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-06-15-preview' existing = {
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: applicationLandingZone.appConfigurationName
+}
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: applicationLandingZone.applicationInsightsName
+}
+
 
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
 
@@ -43,17 +41,13 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   location: location
   tags: tags
   properties: {
-    managedEnvironmentId: containerAppsEnvironmentId
+    managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
       activeRevisionsMode: 'Single'
       secrets: [
         {
-          name: 'table-storage-connection-string'
-          value: tableStorageConnectionString
-        }
-        {
           name: 'appinsights-connection-string'
-          value: applicationInsightsConnectionString
+          value: applicationInsights.properties.ConnectionString
         }
       ]
       registries: [
@@ -101,39 +95,11 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'ConnectionStrings__AppConfig'
-              value: appConfigurationEndpoint
+              value: azureAppConfiguration.properties.endpoint
             }
             {
               name: 'ConnectionStrings__TableStorage'
               secretRef: 'table-storage-connection-string'
-            }
-            {
-              name: 'Dapr__PubSubComponentName'
-              value: daprPubSubComponentName
-            }
-            {
-              name: 'Dapr__StateStoreComponentName'
-              value: daprStateStoreComponentName
-            }
-            {
-              name: 'Dapr__AppId'
-              value: 'members-api'
-            }
-            {
-              name: 'Dapr__HttpEndpoint'
-              value: 'http://localhost:3500'
-            }
-            {
-              name: 'Dapr__GrpcEndpoint'
-              value: 'http://localhost:50001'
-            }
-            {
-              name: 'Logging__LogLevel__Default'
-              value: environment == 'prod' ? 'Information' : 'Debug'
-            }
-            {
-              name: 'Logging__LogLevel__Microsoft.AspNetCore'
-              value: 'Warning'
             }
             {
               name: 'HealthChecks__Enabled'

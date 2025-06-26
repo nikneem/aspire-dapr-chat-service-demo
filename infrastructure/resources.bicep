@@ -69,9 +69,6 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
     disableLocalAuth: false
     zoneRedundant: false
   }
-  identity: {
-    type: 'SystemAssigned'
-  }
 }
 
 // Container Apps Environment
@@ -112,12 +109,8 @@ resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2023-0
       keyVaultProperties: null
     }
     disableLocalAuth: false
-    softDeleteRetentionInDays: 1
     enablePurgeProtection: false
     publicNetworkAccess: 'Enabled'
-  }
-  identity: {
-    type: 'SystemAssigned'
   }
 }
 

@@ -52,7 +52,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       registries: [
         {
-          server: containerRegistryServer
+          server: 'docker.io'
         }
       ]
       ingress: {

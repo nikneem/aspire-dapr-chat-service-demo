@@ -50,11 +50,6 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           value: applicationInsights.properties.ConnectionString
         }
       ]
-      registries: [
-        {
-          server: 'docker.io'
-        }
-      ]
       ingress: {
         external: true
         targetPort: 8080

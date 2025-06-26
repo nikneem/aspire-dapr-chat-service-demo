@@ -1,0 +1,369 @@
+name: Deploy Members API
+
+on:
+  pull_request:
+    paths:
+      - 'src/Members/**'
+      - 'src/Shared/**'
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/Members/**'
+      - 'src/Shared/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  AZURE_LOCATION: "West Europe"
+  DOTNET_VERSION: "9.0.x"
+  API_PROJECT_PATH: "src/Members/HexMaster.Chat.Members.Api"
+  TESTS_PROJECT_PATH: "src/Members/HexMaster.Chat.Members.Tests"
+  INFRASTRUCTURE_PATH: "src/Members/infrastructure"
+  CONTAINER_REGISTRY_NAME: "hexmasterchat"
+  IMAGE_NAME: "members-api"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  packages: write
+
+jobs:
+  versionize:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.gitversion.outputs.SemVer }}
+      assemblySemFileVer: ${{ steps.gitversion.outputs.AssemblySemFileVer }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.2.1
+        with:
+          versionSpec: "5.x"
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.2.1
+        with:
+          useConfigFile: true
+
+  test:
+    name: Test Members API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.TESTS_PROJECT_PATH }}
+
+      - name: Build Members API and Tests
+        run: |
+          dotnet build ${{ env.API_PROJECT_PATH }} --no-restore --configuration Release
+          dotnet build ${{ env.TESTS_PROJECT_PATH }} --no-restore --configuration Release
+
+      - name: Run Members API Tests
+        run: |
+          dotnet test ${{ env.TESTS_PROJECT_PATH }} \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --logger trx \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Members API Test Results
+          path: TestResults/*.trx
+          reporter: dotnet-trx
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: members-test-results
+          path: TestResults/
+          retention-days: 30
+
+  build-and-push:
+    name: Build and Push Container
+    runs-on: ubuntu-latest
+    needs: [test, versionize]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Dotnet Publish Container
+        working-directory: src/Brp/Wigo4it.StubApis.Brp.Api
+        run: dotnet publish --os linux --arch arm64 /t:PublishContainer -p:ContainerImageTag=${{needs.versionize.outputs.semver}} -c Release
+
+
+
+
+  # prepare-infrastructure:
+  #   name: Prepare Infrastructure
+  #   runs-on: ubuntu-latest
+  #   needs: [test]
+  #   outputs:
+  #     dev-artifact-name: members-infrastructure-dev
+  #     prod-artifact-name: members-infrastructure-prod
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Install Azure CLI
+  #       uses: azure/setup-cli@v2
+  #       with:
+  #         azcli-version: latest
+
+  #     - name: Validate Bicep templates
+  #       run: |
+  #         echo "Validating Members API Bicep templates..."
+  #         cd ${{ env.INFRASTRUCTURE_PATH }}
+          
+  #         echo "Building main.bicep..."
+  #         az bicep build --file main.bicep
+          
+  #         echo "Building dev parameters..."
+  #         az bicep build-params --file main.dev.bicepparam --outfile main.dev.generated.json
+          
+  #         echo "Building prod parameters..."
+  #         az bicep build-params --file main.prod.bicepparam --outfile main.prod.generated.json
+          
+  #         echo "Bicep templates are valid!"
+
+  #     - name: Upload Development Infrastructure Artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: members-infrastructure-dev
+  #         path: |
+  #           ${{ env.INFRASTRUCTURE_PATH }}/*.json
+  #         retention-days: 30
+
+  #     - name: Upload Production Infrastructure Artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: members-infrastructure-prod
+  #         path: |
+  #           ${{ env.INFRASTRUCTURE_PATH }}/*.json
+  #         retention-days: 30
+
+  # deploy-dev:
+  #   name: Deploy to Development
+  #   runs-on: ubuntu-latest
+  #   needs: [test, build-and-push, prepare-infrastructure]
+  #   if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+  #   environment: 
+  #     name: development
+  #     url: ${{ steps.deploy.outputs.app-url }}
+  #   steps:
+  #     - name: Download Infrastructure Artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ needs.prepare-infrastructure.outputs.dev-artifact-name }}
+  #         path: infrastructure/
+
+  #     - name: Azure CLI Login
+  #       uses: azure/login@v1
+  #       with:
+  #         client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_DEV_SUBSCRIPTION_ID }}
+
+  #     - name: Extract container image tag
+  #       id: image-info
+  #       run: |
+  #         # Extract the image tag from the build job output
+  #         IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+  #         echo "Full image tag: $IMAGE_TAG"
+          
+  #         # Extract just the tag part (after the last colon)
+  #         TAG_ONLY=$(echo "$IMAGE_TAG" | sed 's/.*://')
+  #         echo "tag-only=$TAG_ONLY" >> $GITHUB_OUTPUT
+  #         echo "full-image=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  #     - name: What-If Deployment (Development)
+  #       id: whatif-dev
+  #       run: |
+  #         echo "Running what-if analysis for Members API development environment..."
+  #         az deployment sub what-if \
+  #           --location "${{ env.AZURE_LOCATION }}" \
+  #           --template-file infrastructure/main.json \
+  #           --parameters infrastructure/main.dev.generated.json \
+  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
+  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+  #           --output table
+
+  #     - name: Deploy to Development
+  #       id: deploy
+  #       run: |
+  #         echo "Deploying Members API to development environment..."
+  #         deployment_output=$(az deployment sub create \
+  #           --location "${{ env.AZURE_LOCATION }}" \
+  #           --template-file infrastructure/main.json \
+  #           --parameters infrastructure/main.dev.generated.json \
+  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
+  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+  #           --output json)
+          
+  #         echo "Deployment completed successfully!"
+  #         echo "$deployment_output" | jq '.'
+          
+  #         # Extract the app URL if available in outputs
+  #         app_url=$(echo "$deployment_output" | jq -r '.properties.outputs.appUrl.value // empty')
+  #         if [ ! -z "$app_url" ]; then
+  #           echo "app-url=$app_url" >> $GITHUB_OUTPUT
+  #         fi
+
+  #     - name: Comment PR with deployment info
+  #       if: github.event_name == 'pull_request'
+  #       uses: actions/github-script@v7
+  #       with:
+  #         script: |
+  #           const deploymentInfo = `
+  #           ## Members API Deployment to Development Environment ✅
+            
+  #           **Container Image:** \`${{ steps.image-info.outputs.full-image }}\`
+  #           **Environment:** Development
+  #           **Status:** Successfully deployed
+  #           ${process.env.APP_URL ? `**App URL:** ${process.env.APP_URL}` : ''}
+            
+  #           **Deployment Details:**
+  #           - Tests: ✅ Passed
+  #           - Container Build: ✅ Completed
+  #           - Infrastructure: ✅ Validated and deployed
+  #           `;
+            
+  #           github.rest.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: deploymentInfo
+  #           });
+  #         env:
+  #           APP_URL: ${{ steps.deploy.outputs.app-url }}
+
+  # deploy-prod:
+  #   name: Deploy to Production
+  #   runs-on: ubuntu-latest
+  #   needs: [test, build-and-push, prepare-infrastructure]
+  #   if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[deploy-prod]'))
+  #   environment: 
+  #     name: production
+  #     url: ${{ steps.deploy.outputs.app-url }}
+  #   steps:
+  #     - name: Download Infrastructure Artifacts
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ needs.prepare-infrastructure.outputs.prod-artifact-name }}
+  #         path: infrastructure/
+
+  #     - name: Azure CLI Login
+  #       uses: azure/login@v1
+  #       with:
+  #         client-id: ${{ secrets.AZURE_PROD_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_PROD_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_PROD_SUBSCRIPTION_ID }}
+
+  #     - name: Extract container image tag
+  #       id: image-info
+  #       run: |
+  #         # Extract the image tag from the build job output
+  #         IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+  #         echo "Full image tag: $IMAGE_TAG"
+          
+  #         # Extract just the tag part (after the last colon)
+  #         TAG_ONLY=$(echo "$IMAGE_TAG" | sed 's/.*://')
+  #         echo "tag-only=$TAG_ONLY" >> $GITHUB_OUTPUT
+  #         echo "full-image=$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  #     - name: What-If Deployment (Production)
+  #       id: whatif-prod
+  #       run: |
+  #         echo "Running what-if analysis for Members API production environment..."
+  #         az deployment sub what-if \
+  #           --location "${{ env.AZURE_LOCATION }}" \
+  #           --template-file infrastructure/main.json \
+  #           --parameters infrastructure/main.prod.generated.json \
+  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
+  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+  #           --output table
+
+  #     - name: Deploy to Production
+  #       id: deploy
+  #       run: |
+  #         echo "Deploying Members API to production environment..."
+  #         deployment_output=$(az deployment sub create \
+  #           --location "${{ env.AZURE_LOCATION }}" \
+  #           --template-file infrastructure/main.json \
+  #           --parameters infrastructure/main.prod.generated.json \
+  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
+  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
+  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
+  #           --output json)
+          
+  #         echo "Production deployment completed successfully!"
+  #         echo "$deployment_output" | jq '.'
+          
+  #         # Extract the app URL if available in outputs
+  #         app_url=$(echo "$deployment_output" | jq -r '.properties.outputs.appUrl.value // empty')
+  #         if [ ! -z "$app_url" ]; then
+  #           echo "app-url=$app_url" >> $GITHUB_OUTPUT
+  #         fi
+
+  # cleanup:
+  #   name: Cleanup
+  #   runs-on: ubuntu-latest
+  #   needs: [deploy-dev, deploy-prod]
+  #   if: always()
+  #   steps:
+  #     - name: Clean up temporary artifacts
+  #       run: |
+  #         echo "Workflow completed. Temporary artifacts will be automatically cleaned up based on retention policy."

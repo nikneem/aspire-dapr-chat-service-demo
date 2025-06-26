@@ -98,14 +98,6 @@ jobs:
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults
 
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Members API Test Results
-          path: TestResults/*.trx
-          reporter: dotnet-trx
-
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()

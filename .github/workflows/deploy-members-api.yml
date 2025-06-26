@@ -190,8 +190,6 @@ jobs:
             --parameters infrastructure/main.dev.generated.json \
             --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
             --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-            --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
-            --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
             --output table
 
       - name: Deploy to Development
@@ -204,8 +202,6 @@ jobs:
             --parameters infrastructure/main.dev.generated.json \
             --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
             --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-            --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
-            --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
             --output json)
           
           echo "Deployment completed successfully!"

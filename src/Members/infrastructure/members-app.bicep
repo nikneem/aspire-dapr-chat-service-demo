@@ -46,7 +46,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
-    isHnsEnabled: true // Hierarchical namespace for Azure Data Lake Gen2
+    isHnsEnabled: true 
   }
   resource tableService 'tableServices' = {
     name: 'default'

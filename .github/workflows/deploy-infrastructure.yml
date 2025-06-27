@@ -1,0 +1,263 @@
+# To enable manual approval for production deployments:
+# 1. Go to GitHub Repository Settings > Environments
+# 2. Create an environment named "production"
+# 3. Enable "Required reviewers" and add team members who should approve
+# 4. Optionally set "Wait timer" to add a delay before deployment
+# 5. Configure environment secrets if different from repository secrets:
+#    - AZURE_PROD_CLIENT_ID
+#    - AZURE_PROD_TENANT_ID  
+#    - AZURE_PROD_SUBSCRIPTION_ID
+
+name: Application Landing Zone Deployment
+
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/**'
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  AZURE_LOCATION: "North Europe"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Prepare Deployment Parameters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Bicep templates
+        run: |
+          echo "Validating main.bicep template..."
+          az bicep build --file infrastructure/main.bicep
+          
+          echo "Validating resources.bicep template..."
+          az bicep build --file infrastructure/resources.bicep
+
+          echo "Validating dev params..."
+          az bicep build-params --file infrastructure/main.dev.bicepparam --outfile infrastructure/main.dev.generated.json
+          
+          echo "Validating prod params..."
+          az bicep build-params --file infrastructure/main.prod.bicepparam --outfile infrastructure/main.prod.generated.json
+
+          echo "Bicep templates are valid!"
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload Infrastructure Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-files
+          path: |
+            infrastructure/*.json
+          retention-days: 30
+
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    steps:
+      - name: Download Infrastructure Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: infrastructure-files
+          path: infrastructure/
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_DEV_SUBSCRIPTION_ID }}
+
+      - name: What-If Deployment (Development)
+        id: whatif-dev
+        run: |
+          echo "Running what-if analysis for development environment..."
+          az deployment sub what-if \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.dev.generated.json \
+            --name "hexchat-dev-whatif-$(date +%Y%m%d-%H%M%S)" \
+            --output table
+        working-directory: ${{ github.workspace }}
+
+      - name: Deploy to Development
+        id: deploy-dev
+        run: |
+          echo "Deploying to development environment..."
+          az deployment sub create \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.dev.generated.json \
+            --name "hexchat-dev-$(date +%Y%m%d-%H%M%S)" \
+            --output json > deployment-output-dev.json
+          
+          echo "Deployment completed successfully!"
+          cat deployment-output-dev.json
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload Development Deployment Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-output-dev
+          path: deployment-output-dev.json
+          retention-days: 30
+
+      - name: Comment PR with Development Deployment Status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const deploymentOutput = JSON.parse(fs.readFileSync('deployment-output-dev.json', 'utf8'));
+            
+            const comment = `## 🚀 Development Infrastructure Deployment
+            
+            **Status**: ✅ Successful
+            **Environment**: Development
+            **Deployment Name**: ${deploymentOutput.name}
+            **Resource Group**: ${deploymentOutput.properties.outputs.resourceGroupName.value}
+            
+            ### Deployed Resources:
+            - **Service Bus**: ${deploymentOutput.properties.outputs.serviceBusNamespaceName.value}
+            - **Container Apps Environment**: ${deploymentOutput.properties.outputs.containerAppsEnvironmentName.value}
+            - **Redis Cache**: ${deploymentOutput.properties.outputs.redisCacheName.value}
+            - **App Configuration**: ${deploymentOutput.properties.outputs.appConfigurationName.value}
+            
+            [View in Azure Portal](https://portal.azure.com)`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  production-whatif:
+    name: Production What-If Analysis
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    steps:
+      - name: Download Infrastructure Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: infrastructure-files
+          path: infrastructure/
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_PROD_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_PROD_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_PROD_SUBSCRIPTION_ID }}
+
+      - name: What-If Deployment (Production)
+        id: whatif-prod
+        run: |
+          echo "Running what-if analysis for production environment..."
+          az deployment sub what-if \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.prod.generated.json \
+            --name "hexchat-prod-whatif-$(date +%Y%m%d-%H%M%S)" \
+            --output table > whatif-output.txt
+          
+          echo "What-if analysis completed!"
+          cat whatif-output.txt
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload What-If Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatif-results-prod
+          path: whatif-output.txt
+          retention-days: 30
+
+      - name: Create What-If Summary
+        run: |
+          echo "## 📋 Production What-If Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Analyzed at**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Preview:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -50 whatif-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Manual approval required before production deployment**" >> $GITHUB_STEP_SUMMARY
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [production-whatif]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    steps:
+      - name: Download Infrastructure Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: infrastructure-files
+          path: infrastructure/
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_PROD_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_PROD_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_PROD_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production environment..."
+          az deployment sub create \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --template-file infrastructure/main.json \
+            --parameters infrastructure/main.prod.generated.json \
+            --name "hexchat-prod-$(date +%Y%m%d-%H%M%S)" \
+            --output json > deployment-output-prod.json
+          
+          echo "Production deployment completed successfully!"
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload Production Deployment Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-output-prod
+          path: deployment-output-prod.json
+          retention-days: 90
+
+      - name: Create Production Deployment Summary
+        run: |
+          echo "## 🎉 Production Infrastructure Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ✅ Successful" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed at**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "[View Deployment in Azure Portal](https://portal.azure.com)" >> $GITHUB_STEP_SUMMARY

@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <ContainerRegistry>nvv54gsk4pteu.azurecr.io</ContainerRegistry>
+	  <ContainerRepository>aspirichat/realtime-api</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>

@@ -18,7 +18,6 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
-
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-02-02-preview' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
@@ -32,8 +31,30 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   name: applicationLandingZone.applicationInsightsName
 }
 
-
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
+var storageAccountName = uniqueString(containerAppName)
+
+var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=core.windows.net'
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
+  name: storageAccountName
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    supportsHttpsTrafficOnly: true
+    isHnsEnabled: true // Hierarchical namespace for Azure Data Lake Gen2
+  }
+  resource tableService 'tableServices' = {
+    name: 'default'
+    resource membersTable 'tables' = {
+      name: 'members'
+    }
+  }
+}
 
 // Members API Container App
 resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -45,6 +66,10 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
     configuration: {
       activeRevisionsMode: 'Single'
       secrets: [
+        {
+          name: 'table-storage-connection-string'
+          value: storageAccountConnectionString
+        }
         {
           name: 'appinsights-connection-string'
           value: applicationInsights.properties.ConnectionString

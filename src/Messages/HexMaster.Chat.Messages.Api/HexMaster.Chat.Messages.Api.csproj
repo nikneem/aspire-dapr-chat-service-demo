@@ -4,8 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	  <ContainerRegistry>nvv54gsk4pteu.azurecr.io</ContainerRegistry>
-	  <ContainerRepository>aspirichat/messages-api</ContainerRepository>
+	  <ContainerRegistry>docker.io</ContainerRegistry>
+	  <ContainerRepository>cekeilholz/aspirichat-messages-api</ContainerRepository>
+	  <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
+	  <ContainerUser>app</ContainerUser>
   </PropertyGroup>
 
   <ItemGroup>

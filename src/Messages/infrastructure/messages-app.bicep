@@ -7,6 +7,9 @@ param environment string
 @description('Container App name')
 param containerAppName string
 
+@description('Dapr ID of the app')
+param daprId string
+
 param applicationLandingZone object
 
 @description('Container image tag or version')
@@ -88,7 +91,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
       dapr: {
         enabled: true
-        appId: 'members-api'
+        appId: daprId
         appProtocol: 'http'
         appPort: 8080
         logLevel: 'info'

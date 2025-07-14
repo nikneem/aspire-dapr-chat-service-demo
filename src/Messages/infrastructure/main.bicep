@@ -20,7 +20,8 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-var containerAppName = toLower ('${appName}-${tags.Service}-${environment}')
+var containerApp = toLower('${appName}-${tags.Service}')
+var containerAppName = toLower ('${containerApp}-${environment}')
 var resourceGroupName = toLower('${containerAppName}-rg')
 
 // Create Resource Group for Messages service
@@ -41,6 +42,7 @@ module membersApp 'messages-app.bicep' = {
     location: location
     environment: environment
     containerAppName: containerAppName
+    daprId: containerApp
     applicationLandingZone: applicationLandingZone
     containerImageTag: containerImageTag
     containerRegistryServer: containerRegistryServer

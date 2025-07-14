@@ -127,7 +127,7 @@ jobs:
 
       - name: Dotnet Publish Container
         working-directory: ${{env.API_PROJECT_PATH}}
-        run: dotnet publish --os linux --arch arm64 /t:PublishContainer -p:ContainerImageTag=${{needs.versionize.outputs.assemblySemFileVer}} -c Release
+        run: dotnet publish --os linux --arch amd64 /t:PublishContainer -p:ContainerImageTag=${{needs.versionize.outputs.assemblySemFileVer}} -c Release
 
   prepare-infrastructure:
     name: Prepare Infrastructure

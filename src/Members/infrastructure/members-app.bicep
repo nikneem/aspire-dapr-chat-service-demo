@@ -18,7 +18,7 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
-resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2025-02-02-preview' existing = {
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
 }
@@ -46,7 +46,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
-    isHnsEnabled: true 
+    isHnsEnabled: true
   }
   resource tableService 'tableServices' = {
     name: 'default'

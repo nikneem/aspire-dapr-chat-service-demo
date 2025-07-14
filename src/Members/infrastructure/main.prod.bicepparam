@@ -1,12 +1,11 @@
 using 'main.bicep'
 
 // Production Environment Parameters for Members Service
-param location = 'West Europe'
 param environment = 'prod'
 param appName = 'aspirichat'
 
 param applicationLandingZone = {
-  resourceGroupName: 'aspirichat-dev-rg'
+  resourceGroupName: 'aspirichat-lanzingzn-dev-rg'
   containerAppsEnvironmentName: 'aspirichat-cae-dev-jl2mqo4oottpk'
   appConfigurationName: 'aspirichat-ac-dev-jl2mqo4oottpk'
   applicationInsightsName: 'aspirichat-ai-dev-jl2mqo4oottpk'

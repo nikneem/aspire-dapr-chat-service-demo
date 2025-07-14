@@ -1,9 +1,8 @@
 using 'main.bicep'
 
 // Production Environment Parameters
-param location = 'West Europe'
 param environment = 'prod'
-param appName = 'hexchat'
+param appName = 'aspirichat-lanzingzn'
 param tags = {
   Environment: 'Production'
   Application: 'HexMaster Chat'

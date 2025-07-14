@@ -18,7 +18,7 @@ var resourceGroupName = '${defaultResourceName}-rg'
 // Create Resource Group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
-  location: location
+  location: location // Default location, can be overridden in parameters
   tags: tags
 }
 

@@ -1,17 +1,16 @@
 using 'main.bicep'
 
 // Development Environment Parameters for Members Service
-param location = 'North Europe'
 param environment = 'dev'
 param appName = 'aspirichat'
 
 // These values should be provided during deployment or from Azure DevOps/GitHub Actions variables
 // Container Apps Environment ID from shared infrastructure deployment
 param applicationLandingZone = {
-  resourceGroupName: 'aspirichat-dev-rg'
-  containerAppsEnvironmentName: 'aspirichat-cae-dev-jl2mqo4oottpk'
-  appConfigurationName: 'aspirichat-ac-dev-jl2mqo4oottpk'
-  applicationInsightsName: 'aspirichat-ai-dev-jl2mqo4oottpk'
+  resourceGroupName: 'aspirichat-lanzingzn-dev-rg'
+  containerAppsEnvironmentName: 'aspirichat-lanzingzn-cae-dev-o5774ipalwf62'
+  appConfigurationName: 'aspirichat-lanzingzn-ac-dev-o5774ipalwf62'
+  applicationInsightsName: 'aspirichat-lanzingzn-ai-dev-o5774ipalwf62'
 }
 
 

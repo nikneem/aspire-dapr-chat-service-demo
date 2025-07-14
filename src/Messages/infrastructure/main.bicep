@@ -20,8 +20,8 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-var containerAppName = lower('${appName}-${tags.Service}-${environment}')
-var resourceGroupName = lower('${containerAppName}-rg')
+var containerAppName = toLower ('${appName}-${tags.Service}-${environment}')
+var resourceGroupName = toLower('${containerAppName}-rg')
 
 // Create Resource Group for Messages service
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {

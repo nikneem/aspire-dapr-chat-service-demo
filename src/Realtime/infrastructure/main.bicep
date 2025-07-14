@@ -34,8 +34,8 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 }
 
 // Deploy Members Container App
-module membersApp 'messages-app.bicep' = {
-  name: 'messages-app-deployment'
+module membersApp 'realtime-app.bicep' = {
+  name: 'realtime-app-deployment'
   scope: resourceGroup
   params: {
     location: location

@@ -42,6 +42,7 @@ module membersApp 'realtime-app.bicep' = {
     location: location
     environment: environment
     containerAppName: containerAppName
+    daprId: containerApp
     applicationLandingZone: applicationLandingZone
     containerImageTag: containerImageTag
     containerRegistryServer: containerRegistryServer

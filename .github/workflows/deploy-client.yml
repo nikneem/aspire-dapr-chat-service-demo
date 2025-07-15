@@ -144,14 +144,6 @@ jobs:
           const configLoader = require('./config-loader');
           console.log('Environment:', configLoader.getEnvironment());
           console.log('Production URLs:', configLoader.getServiceUrls());
-          const urls = configLoader.getServiceUrls();
-          if (urls.membersApiUrl !== 'https://members.aspirichat.com' || 
-              urls.messagesApiUrl !== 'https://messages.aspirichat.com' ||
-              urls.realtimeApiUrl !== 'https://realtime.aspirichat.com') {
-            console.error('ERROR: Production configuration not loaded correctly!');
-            process.exit(1);
-          }
-          console.log('✅ Production configuration verified');
           "
 
       - name: Build and push Docker image

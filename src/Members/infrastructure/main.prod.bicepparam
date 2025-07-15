@@ -11,11 +11,11 @@ param applicationLandingZone = {
 param containerRegistryServer = 'docker.io'
 
 param tags = {
-  Environment: 'Production'
+  Environment: 'Prod'
   Application: 'HexMaster Chat'
   Service: 'Members'
   CreatedBy: 'Bicep'
   Owner: 'Production Team'
   CostCenter: 'Engineering'
-  Project: 'AspireChat'
+  Project: 'AspiChat'
 }

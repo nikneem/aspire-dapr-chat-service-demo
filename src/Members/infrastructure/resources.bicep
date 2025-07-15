@@ -101,7 +101,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             {
               name: 'ASPNETCORE_ENVIRONMENT'
-              value: tags.Environment == 'prod' ? 'Production' : 'Development'
+              value: tags.Environment == 'Prod' ? 'Production' : 'Development'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'

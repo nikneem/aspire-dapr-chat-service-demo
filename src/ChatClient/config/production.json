@@ -1,0 +1,13 @@
+{
+  "environment": "production",
+  "services": {
+    "membersApiUrl": "https://aspichat-members-dev-app.jollypebble-9085dcf2.northeurope.azurecontainerapps.io",
+    "messagesApiUrl": "https://aspichat-messages-dev-app.jollypebble-9085dcf2.northeurope.azurecontainerapps.io",
+    "realtimeApiUrl": "https://aspichat-realtime-dev-app.jollypebble-9085dcf2.northeurope.azurecontainerapps.io"
+  },
+  "client": {
+    "title": "AspireChat",
+    "description": "Production chat application",
+    "debug": false
+  }
+}

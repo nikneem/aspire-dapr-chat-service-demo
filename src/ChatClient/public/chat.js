@@ -9,6 +9,7 @@
           if (response.ok) {
             config = await response.json();
             updateConfigDisplay();
+            updateClientSettings();
             return true;
           } else {
             // Fallback to default configuration for development
@@ -16,8 +17,14 @@
               membersApiUrl: "http://localhost:5129",
               messagesApiUrl: "http://localhost:5227",
               realtimeApiUrl: "http://localhost:5206",
+              client: {
+                title: "AspireChat - Fallback",
+                description: "Chat application with fallback configuration",
+                debug: true
+              }
             };
             updateConfigDisplay();
+            updateClientSettings();
             addSystemMessage(
               "Using fallback configuration - ensure Aspire services are running"
             );
@@ -30,8 +37,14 @@
             membersApiUrl: "http://localhost:5129",
             messagesApiUrl: "http://localhost:5227",
             realtimeApiUrl: "http://localhost:5206",
+            client: {
+              title: "AspireChat - Fallback",
+              description: "Chat application with fallback configuration",
+              debug: true
+            }
           };
           updateConfigDisplay();
+          updateClientSettings();
           addSystemMessage("Failed to load configuration - using defaults");
           return false;
         }
@@ -43,8 +56,22 @@
           <strong>Service Configuration:</strong><br>
           Members API: ${config.membersApiUrl}<br>
           Messages API: ${config.messagesApiUrl}<br>
-          Realtime API: ${config.realtimeApiUrl}
+          Realtime API: ${config.realtimeApiUrl}<br>
+          Environment: ${config.client?.debug ? 'Development' : 'Production'}
         `;
+      }
+
+      function updateClientSettings() {
+        // Update page title if provided
+        if (config.client?.title) {
+          document.title = config.client.title;
+        }
+
+        // Add debug information if in debug mode
+        if (config.client?.debug) {
+          console.log('Debug mode enabled');
+          console.log('Configuration:', config);
+        }
       }
 
       async function registerMember() {

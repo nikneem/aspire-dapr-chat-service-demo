@@ -21,7 +21,13 @@ If you need to run the client independently:
 # Install dependencies
 npm install
 
-# Start the development server
+# Start in development mode (uses development.json config)
+npm run dev
+
+# Start in production mode (uses production.json config)
+npm run prod
+
+# Start with default configuration (respects NODE_ENV)
 npm start
 ```
 
@@ -35,13 +41,36 @@ The server will start on port 3000 by default, or use the PORT environment varia
 
 ## Configuration
 
-The client automatically receives service URLs from Aspire through environment variables:
+The client uses environment-specific configuration files to determine service URLs:
 
-- `services__hexmaster_chat_members_api__http__0` - Members API URL
-- `services__hexmaster_chat_messages_api__http__0` - Messages API URL
-- `services__hexmaster_chat_realtime_api__http__0` - Realtime API URL
+### Development Mode
+- Uses `config/development.json` with localhost URLs
+- Enables debug mode and additional logging
+- Aspire environment variables override configuration file settings
 
-These are exposed to the frontend via the `/api/config` endpoint.
+### Production Mode
+- Uses `config/production.json` with production URLs
+- Optimized for deployment with reduced logging
+- Service URLs point to: `members.aspirichat.com`, `messages.aspirichat.com`, `realtime.aspirichat.com`
+
+### Environment Variables
+
+The application supports these environment variables:
+
+- `NODE_ENV` - Environment mode (development/production)
+- `PORT` - Server port (default: 3000)
+- `CLIENT_TITLE` - Override client title
+- `CLIENT_DEBUG` - Enable/disable debug mode
+
+### Aspire Integration
+
+When running with .NET Aspire, the following environment variables will override the configuration:
+
+- `services__membersapi__http__0` - Members API URL
+- `services__messagesapi__http__0` - Messages API URL
+- `services__realtimeapi__http__0` - Realtime API URL
+
+See [CONFIG.md](CONFIG.md) for detailed configuration information.
 
 ## Docker
 

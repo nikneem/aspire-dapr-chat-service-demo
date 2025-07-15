@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const configLoader = require('./config-loader');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,10 +19,14 @@ app.get('/', (req, res) => {
 
 // Configuration endpoint to provide service URLs to the client
 app.get('/api/config', (req, res) => {
+    const serviceUrls = configLoader.getServiceUrls();
+    const clientConfig = configLoader.getClientConfig();
+    
     const config = {
-        membersApiUrl: process.env.services__membersapi__http__0 || 'http://localhost:5129',
-        messagesApiUrl: process.env.services__messagesapi__http__0 || 'http://localhost:5227',
-        realtimeApiUrl: process.env.services__realtimeapi__http__0 || 'http://localhost:5206',
+        membersApiUrl: serviceUrls.membersApiUrl,
+        messagesApiUrl: serviceUrls.messagesApiUrl,
+        realtimeApiUrl: serviceUrls.realtimeApiUrl,
+        client: clientConfig
     };
     
     res.json(config);
@@ -29,19 +34,24 @@ app.get('/api/config', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    const config = configLoader.getConfig();
+    res.json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        environment: configLoader.getEnvironment(),
+        services: configLoader.getServiceUrls()
+    });
 });
 
 app.listen(port, '0.0.0.0', () => {
+    const config = configLoader.getConfig();
+    const serviceUrls = configLoader.getServiceUrls();
+    
     console.log(`Chat client server running on port ${port}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    if (process.env.services__membersapi__http__0) {
-        console.log(`Members API: ${process.env.services__membersapi__http__0}`);
-    }
-    if (process.env.services__messagesapi__http__0) {
-        console.log(`Messages API: ${process.env.services__messagesapi__http__0}`);
-    }
-    if (process.env.services__realtimeapi__http__0) {
-        console.log(`Realtime API: ${process.env.services__realtimeapi__http__0}`);
-    }
+    console.log(`Environment: ${configLoader.getEnvironment()}`);
+    console.log(`Title: ${config.client.title}`);
+    console.log(`Debug mode: ${config.client.debug}`);
+    console.log(`Members API: ${serviceUrls.membersApiUrl}`);
+    console.log(`Messages API: ${serviceUrls.messagesApiUrl}`);
+    console.log(`Realtime API: ${serviceUrls.realtimeApiUrl}`);
 });

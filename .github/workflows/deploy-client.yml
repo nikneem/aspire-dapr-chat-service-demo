@@ -122,6 +122,38 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Prepare production build
+        working-directory: ${{ env.CLIENT_PROJECT_PATH }}
+        run: |
+          echo "Preparing production build..."
+          
+          # Verify configuration files exist
+          if [ ! -f "config/development.json" ]; then
+            echo "ERROR: Development configuration file not found!"
+            exit 1
+          fi
+          
+          if [ ! -f "config/production.json" ]; then
+            echo "ERROR: Production configuration file not found!"
+            exit 1
+          fi
+          
+          # Test production configuration loading
+          echo "Testing production configuration..."
+          NODE_ENV=production node -e "
+          const configLoader = require('./config-loader');
+          console.log('Environment:', configLoader.getEnvironment());
+          console.log('Production URLs:', configLoader.getServiceUrls());
+          const urls = configLoader.getServiceUrls();
+          if (urls.membersApiUrl !== 'https://members.aspirichat.com' || 
+              urls.messagesApiUrl !== 'https://messages.aspirichat.com' ||
+              urls.realtimeApiUrl !== 'https://realtime.aspirichat.com') {
+            console.error('ERROR: Production configuration not loaded correctly!');
+            process.exit(1);
+          }
+          console.log('✅ Production configuration verified');
+          "
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -133,6 +165,8 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/aspirichat-client:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
 
       - name: Set image info
         id: image-info

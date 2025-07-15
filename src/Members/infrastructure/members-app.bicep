@@ -118,7 +118,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: azureAppConfiguration.properties.endpoint
             }
             {
-              name: 'ConnectionStrings__memberstables'
+              name: 'ConnectionStrings__tables'
               secretRef: 'table-storage-connection-string'
             }
             {

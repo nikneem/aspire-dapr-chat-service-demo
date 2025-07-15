@@ -8,7 +8,12 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "start:dev": "set NODE_ENV=development && node server.js",
+    "start:prod": "set NODE_ENV=production && node server.js",
+    "dev": "set NODE_ENV=development && node server.js",
+    "prod": "set NODE_ENV=production && node server.js",
+    "build:prod": "node build-prod.js",
+    "test:config": "node -e \"const configLoader = require('./config-loader'); console.log('Environment:', configLoader.getEnvironment()); console.log('Configuration:', configLoader.getConfig());\""
   },
   "dependencies": {
     "express": "^4.18.2",

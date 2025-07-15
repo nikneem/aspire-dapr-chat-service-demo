@@ -18,16 +18,16 @@ var serviceName = toLower('${tags.Project}-${tags.Service}')
 var defaultResourceName = toLower('${serviceName}-${tags.Environment}')
 var resourceGroupName = '${defaultResourceName}-rg'
 
-// Create Resource Group for service
+// Create Resource Group for ChatClient service
 resource targetResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
   tags: tags
 }
 
-// Deploy Container App
-module membersApp 'resources.bicep' = {
-  name: 'members-app-deployment'
+// Deploy ChatClient Container App
+module chatClientApp 'resources.bicep' = {
+  name: 'chatclient-app-deployment'
   scope: targetResourceGroup
   params: {
     serviceName: serviceName
@@ -42,6 +42,6 @@ module membersApp 'resources.bicep' = {
 
 // Outputs
 output resourceGroupName string = targetResourceGroup.name
-output containerAppName string = membersApp.outputs.containerAppName
-output containerAppUrl string = membersApp.outputs.containerAppUrl
-output containerAppFqdn string = membersApp.outputs.containerAppFqdn
+output containerAppName string = chatClientApp.outputs.containerAppName
+output containerAppUrl string = chatClientApp.outputs.containerAppUrl
+output containerAppFqdn string = chatClientApp.outputs.containerAppFqdn

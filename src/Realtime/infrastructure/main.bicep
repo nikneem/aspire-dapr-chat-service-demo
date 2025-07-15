@@ -6,12 +6,6 @@ param location string = deployment().location
 @description('Tags to apply to all resources')
 param tags object = {}
 
-@description('Environment name (dev, staging, prod)')
-param environment string
-
-@description('Application name prefix')
-param appName string
-
 param applicationLandingZone object
 
 @description('Container image tag or version')
@@ -20,41 +14,34 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-var containerApp = toLower('${appName}-${tags.Service}')
-var containerAppName = toLower ('${containerApp}-${environment}')
-var resourceGroupName = toLower('${containerAppName}-rg')
+var serviceName = toLower('${tags.Project}-${tags.Service}')
+var defaultResourceName = toLower('${serviceName}-${tags.Environment}')
+var resourceGroupName = '${defaultResourceName}-rg'
 
-// Create Resource Group for Messages service
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+// Create Resource Group for service
+resource targetResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
-  tags: union(tags, {
-    Service: tags.Service
-    Component: 'API'
-  })
+  tags: tags
 }
 
-// Deploy Members Container App
-module membersApp 'realtime-app.bicep' = {
+// Deploy Container App
+module containerApp 'resources.bicep' = {
   name: 'realtime-app-deployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
+    serviceName: serviceName
+    defaultResourceName: defaultResourceName
     location: location
-    environment: environment
-    containerAppName: containerAppName
-    daprId: containerApp
     applicationLandingZone: applicationLandingZone
     containerImageTag: containerImageTag
     containerRegistryServer: containerRegistryServer
-    tags: union(tags, {
-      Service: tags.Service
-      Component: 'API'
-    })
+    tags: tags
   }
 }
 
 // Outputs
-output resourceGroupName string = resourceGroup.name
-output containerAppName string = membersApp.outputs.containerAppName
-output containerAppUrl string = membersApp.outputs.containerAppUrl
-output containerAppFqdn string = membersApp.outputs.containerAppFqdn
+output resourceGroupName string = targetResourceGroup.name
+output containerAppName string = containerApp.outputs.containerAppName
+output containerAppUrl string = containerApp.outputs.containerAppUrl
+output containerAppFqdn string = containerApp.outputs.containerAppFqdn

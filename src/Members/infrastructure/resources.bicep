@@ -19,6 +19,17 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
+param containerPort int = 8080
+
+var serviceBusTopics = [
+  {
+    name: 'member-joined'
+  }
+  {
+    name: 'member-left'
+  }
+]
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
@@ -30,6 +41,14 @@ resource azureAppConfiguration 'Microsoft.AppConfiguration/configurationStores@2
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.applicationInsightsName
+}
+module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
+  name: '${serviceName}-sb-topics'
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  params: {
+    landingzoneEnvironment: applicationLandingZone
+    topics: serviceBusTopics
+  }
 }
 
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
@@ -59,6 +78,9 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-app'
   location: location
   tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  } 
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
@@ -75,7 +97,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       ingress: {
         external: true
-        targetPort: 8080
+        targetPort: containerPort
         allowInsecure: false
         traffic: [
           {
@@ -88,7 +110,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         enabled: true
         appId: serviceName
         appProtocol: 'http'
-        appPort: 8080
+        appPort: containerPort
         logLevel: 'info'
         enableApiLogging: true
       }
@@ -117,7 +139,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'HealthChecks__Enabled'
-              value: 'false'
+              value: 'true'
             }
           ]
           resources: {
@@ -140,7 +162,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               type: 'Readiness'
               httpGet: {
-                path: '/health/ready'
+                path: '/alive'
                 port: 8080
                 scheme: 'HTTP'
               }
@@ -196,9 +218,6 @@ module tableDataRoleAssignment '../../../infrastructure/shared/role-assignment-t
   }
 }
 
-
-
-// Outputs
 output containerAppName string = apiContainerApp.name
 output containerAppUrl string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
 output containerAppFqdn string = apiContainerApp.properties.configuration.ingress.fqdn

@@ -10,14 +10,13 @@ param applicationLandingZone = {
   serviceBus: 'aspirichat-lanzingzn-sb-dev-o5774ipalwf62'
 }
 
-
 // Container configuration
 param containerRegistryServer = 'docker.io'
 
 param tags = {
   Environment: 'Dev'
   Application: 'HexMaster Chat'
-  Service: 'Messages'
+  Service: 'ChatClient'
   CreatedBy: 'Bicep'
   Owner: 'Development Team'
   CostCenter: 'Engineering'

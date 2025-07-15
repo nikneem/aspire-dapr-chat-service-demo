@@ -1,25 +1,37 @@
+@description('Name of the service')
+param serviceName string
+
+@description('Default resource name prefix for all resources')
+param defaultResourceName string
+
 @description('The location for all resources')
 param location string = resourceGroup().location
 
-@description('Environment name (dev, staging, prod)')
-param environment string
-
-@description('Container App name')
-param containerAppName string
-
-@description('Dapr ID of the app')
-param daprId string
-
+@description('Application landing zone configuration')
 param applicationLandingZone object
 
 @description('Container image tag or version')
-param containerImageTag string = 'latest'
+param containerImageTag string
 
 @description('Container registry server')
 param containerRegistryServer string
 
 @description('Tags to apply to all resources')
 param tags object = {}
+
+var serviceBusTopics = [
+  {
+    name: 'message-sent'
+  }
+  {
+    name: 'member-joined'
+  }
+  {
+    name: 'member-left'
+  }
+]
+
+param containerPort int = 8080
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
@@ -33,46 +45,30 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.applicationInsightsName
 }
-
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
-var storageAccountName = uniqueString(containerAppName)
-
-var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=core.windows.net'
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
-  name: storageAccountName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    supportsHttpsTrafficOnly: true
-    isHnsEnabled: true
-  }
-  resource tableService 'tableServices' = {
-    name: 'default'
-    resource membersTable 'tables' = {
-      name: 'members'
-    }
+module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
+  name: '${serviceName}-sb-topics'
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  params: {
+    landingzoneEnvironment: applicationLandingZone
+    topics: serviceBusTopics
   }
 }
 
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-realtime-api:${containerImageTag}'
+
 // Members API Container App
-resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
-  name: containerAppName
+resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
+  name: '${defaultResourceName}-app'
   location: location
   tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
       activeRevisionsMode: 'Single'
       secrets: [
-        {
-          name: 'table-storage-connection-string'
-          value: storageAccountConnectionString
-        }
         {
           name: 'appinsights-connection-string'
           value: applicationInsights.properties.ConnectionString
@@ -80,7 +76,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       ingress: {
         external: true
-        targetPort: 8080
+        targetPort: containerPort
         allowInsecure: false
         traffic: [
           {
@@ -91,9 +87,9 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
       dapr: {
         enabled: true
-        appId: daprId
+        appId: serviceName
         appProtocol: 'http'
-        appPort: 8080
+        appPort: containerPort
         logLevel: 'info'
         enableApiLogging: true
       }
@@ -101,16 +97,12 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
     template: {
       containers: [
         {
-          name: 'members-api'
+          name: serviceName
           image: containerImageName
           env: [
             {
               name: 'ASPNETCORE_ENVIRONMENT'
-              value: environment == 'prod' ? 'Production' : 'Development'
-            }
-            {
-              name: 'ASPNETCORE_URLS'
-              value: 'http://+:8080'
+              value: tags.Environment == 'Prod' ? 'Production' : 'Development'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -119,10 +111,6 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               name: 'ConnectionStrings__AppConfig'
               value: azureAppConfiguration.properties.endpoint
-            }
-            {
-              name: 'ConnectionStrings__TableStorage'
-              secretRef: 'table-storage-connection-string'
             }
             {
               name: 'HealthChecks__Enabled'
@@ -149,7 +137,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             {
               type: 'Readiness'
               httpGet: {
-                path: '/health/ready'
+                path: '/alive'
                 port: 8080
                 scheme: 'HTTP'
               }
@@ -189,8 +177,16 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Outputs
-output containerAppName string = membersContainerApp.name
-output containerAppUrl string = 'https://${membersContainerApp.properties.configuration.ingress.fqdn}'
-output containerAppFqdn string = membersContainerApp.properties.configuration.ingress.fqdn
-output containerAppId string = membersContainerApp.id
+module appConfigRoleAssignment '../../../infrastructure/shared/role-assignment-app-configuration.bicep' = {
+  name: '${defaultResourceName}-appcfg-module'
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  params: {
+    containerAppPrincipalId: apiContainerApp.identity.principalId
+    systemName: serviceName
+  }
+}
+
+output containerAppName string = apiContainerApp.name
+output containerAppUrl string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
+output containerAppFqdn string = apiContainerApp.properties.configuration.ingress.fqdn
+output containerAppId string = apiContainerApp.id

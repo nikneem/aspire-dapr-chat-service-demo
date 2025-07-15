@@ -14,7 +14,7 @@ param containerRegistryServer = 'docker.io'
 param tags = {
   Environment: 'Prod'
   Application: 'HexMaster Chat'
-  Service: 'Realtime'
+  Service: 'ChatClient'
   CreatedBy: 'Bicep'
   Owner: 'Production Team'
   CostCenter: 'Engineering'

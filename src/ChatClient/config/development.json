@@ -1,0 +1,13 @@
+{
+  "environment": "development",
+  "services": {
+    "membersApiUrl": "http://localhost:5129",
+    "messagesApiUrl": "http://localhost:5227",
+    "realtimeApiUrl": "http://localhost:5206"
+  },
+  "client": {
+    "title": "AspireChat - Development",
+    "description": "Chat application running in development environment",
+    "debug": true
+  }
+}

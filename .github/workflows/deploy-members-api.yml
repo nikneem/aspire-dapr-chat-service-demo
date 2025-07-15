@@ -193,21 +193,24 @@ jobs:
             --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
             --output table
 
-      - name: Deploy to Development
-        id: deploy
-        run: |
-          echo "Deploying Members API to development environment..."
-          deployment_output=$(az deployment sub create \
-            --location "${{ env.AZURE_LOCATION }}" \
-            --template-file infrastructure/main.json \
-            --name "aspirichat-members-$(date +%Y%m%d-%H%M%S)" \
-            --parameters infrastructure/main.dev.generated.json \
-            --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
-            --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-            --output json)
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: '2.72.0'
+          inlineScript: |
+            echo "Deploying Members API to development environment..."
+            deployment_output=$(az deployment sub create \
+              --location "${{ env.AZURE_LOCATION }}" \
+              --template-file infrastructure/main.json \
+              --name "aspirichat-members-$(date +%Y%m%d-%H%M%S)" \
+              --parameters infrastructure/main.dev.generated.json \
+              --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
+              --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+              --output json)
           
-          echo "Deployment completed successfully!"
-          echo "$deployment_output" | jq '.'
+            echo "Deployment completed successfully!"
+            echo "$deployment_output" | jq '.'
 
       - name: Comment PR with deployment info
         if: github.event_name == 'pull_request'

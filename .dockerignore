@@ -1,0 +1,71 @@
+# .dockerignore for Members API
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/TestResults/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test files
+**/*Tests/
+**/TestResults/
+**/*.trx
+**/*.coverage
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Coverage reports
+CoverageReport/
+*.cobertura.xml
+
+# Aspire dashboard (development only)
+**/aspire-dashboard/
+
+# ChatClient (not needed for Members API)
+src/ChatClient/
+
+# Other services (not needed for Members API)
+src/Messages/
+src/Realtime/
+
+# Infrastructure (handled separately)
+infrastructure/
+dapr/
+
+# GitHub workflows and documentation
+.github/
+*.yml
+*.yaml

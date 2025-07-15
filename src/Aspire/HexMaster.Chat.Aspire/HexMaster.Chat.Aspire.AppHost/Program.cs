@@ -9,7 +9,8 @@ var storage = builder.AddAzureStorage("storage")
         options.WithLifetime(ContainerLifetime.Persistent);
     });
 
-var tables = storage.AddTables("tables");
+var membersTables = storage.AddTables("memberstables");
+var messagesTables = storage.AddTables("messagestables");
 
 // Add Dapr
 builder.AddDapr();
@@ -21,11 +22,11 @@ var daprOptions = new DaprSidecarOptions
 
 // Add microservices with Dapr sidecars
 var membersApi = builder.AddProject<Projects.HexMaster_Chat_Members_Api>(AspireConstants.MembersApiName)
-    .WithReference(tables)
+    .WithReference(membersTables)
     .WithDaprSidecar(daprOptions);
 
 var messagesApi = builder.AddProject<Projects.HexMaster_Chat_Messages_Api>(AspireConstants.MessagesApiName)
-    .WithReference(tables)
+    .WithReference(messagesTables)
     .WithDaprSidecar(daprOptions);
 
 

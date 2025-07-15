@@ -4,6 +4,10 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<ContainerRegistry>docker.io</ContainerRegistry>
+	<ContainerRepository>cekeilholz/aspirichat-realtime-api</ContainerRepository>
+	<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
+	<ContainerUser>app</ContainerUser>
   </PropertyGroup>
 
   <ItemGroup>

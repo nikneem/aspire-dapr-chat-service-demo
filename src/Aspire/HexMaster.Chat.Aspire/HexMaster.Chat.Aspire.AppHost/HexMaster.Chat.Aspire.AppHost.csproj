@@ -20,16 +20,13 @@
     <PackageReference Include="Aspire.Hosting.Redis" Version="9.3.1" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.3.1" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.3.1" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Dapr" Version="9.5.0" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Dapr" Version="9.6.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\..\Members\HexMaster.Chat.Members.Api\HexMaster.Chat.Members.Api.csproj" />
-    <ProjectReference
-      Include="..\..\..\Messages\HexMaster.Chat.Messages.Api\HexMaster.Chat.Messages.Api.csproj" />
-    <ProjectReference
-      Include="..\..\..\Realtime\HexMaster.Chat.Realtime.Api\HexMaster.Chat.Realtime.Api.csproj" />
+    <ProjectReference Include="..\..\..\Members\HexMaster.Chat.Members.Api\HexMaster.Chat.Members.Api.csproj" />
+    <ProjectReference Include="..\..\..\Messages\HexMaster.Chat.Messages.Api\HexMaster.Chat.Messages.Api.csproj" />
+    <ProjectReference Include="..\..\..\Realtime\HexMaster.Chat.Realtime.Api\HexMaster.Chat.Realtime.Api.csproj" />
   </ItemGroup>
 
   <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
@@ -38,10 +35,8 @@
     </ItemGroup>
 
     <!-- Install npm packages if node_modules is missing -->
-    <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)"
-      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
-    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)"
-      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+    <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
   </Target>
 
 </Project>

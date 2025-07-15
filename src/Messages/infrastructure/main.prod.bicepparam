@@ -5,6 +5,7 @@ param applicationLandingZone = {
   containerAppsEnvironmentName: 'aspirichat-cae-dev-jl2mqo4oottpk'
   appConfigurationName: 'aspirichat-ac-dev-jl2mqo4oottpk'
   applicationInsightsName: 'aspirichat-ai-dev-jl2mqo4oottpk'
+  serviceBus: 'aspirichat-lanzingzn-sb-dev-o5774ipalwf62'
 }
 
 // Container configuration

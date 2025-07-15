@@ -123,39 +123,39 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'HealthChecks__Enabled'
-              value: 'false'
+              value: 'true'
             }
           ]
           resources: {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          // probes: [
-          //   {
-          //     type: 'Liveness'
-          //     httpGet: {
-          //       path: '/health'
-          //       port: 8080
-          //       scheme: 'HTTP'
-          //     }
-          //     initialDelaySeconds: 30
-          //     periodSeconds: 30
-          //     timeoutSeconds: 5
-          //     failureThreshold: 3
-          //   }
-          //   {
-          //     type: 'Readiness'
-          //     httpGet: {
-          //       path: '/health/ready'
-          //       port: 8080
-          //       scheme: 'HTTP'
-          //     }
-          //     initialDelaySeconds: 5
-          //     periodSeconds: 10
-          //     timeoutSeconds: 3
-          //     failureThreshold: 3
-          //   }
-          // ]
+          probes: [
+            {
+              type: 'Liveness'
+              httpGet: {
+                path: '/health'
+                port: 8080
+                scheme: 'HTTP'
+              }
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 5
+              failureThreshold: 3
+            }
+            {
+              type: 'Readiness'
+              httpGet: {
+                path: '/alive'
+                port: 8080
+                scheme: 'HTTP'
+              }
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 3
+              failureThreshold: 3
+            }
+          ]
         }
       ]
       scale: {

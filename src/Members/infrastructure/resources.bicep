@@ -19,6 +19,9 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
+
+param containerPort int = 8080
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
@@ -78,7 +81,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       ingress: {
         external: true
-        targetPort: 8080
+        targetPort: containerPort
         allowInsecure: false
         traffic: [
           {
@@ -91,7 +94,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         enabled: true
         appId: serviceName
         appProtocol: 'http'
-        appPort: 8080
+        appPort: containerPort
         logLevel: 'info'
         enableApiLogging: true
       }
@@ -127,32 +130,32 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          probes: [
-            {
-              type: 'Liveness'
-              httpGet: {
-                path: '/health'
-                port: 8080
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 30
-              periodSeconds: 30
-              timeoutSeconds: 5
-              failureThreshold: 3
-            }
-            {
-              type: 'Readiness'
-              httpGet: {
-                path: '/health/ready'
-                port: 8080
-                scheme: 'HTTP'
-              }
-              initialDelaySeconds: 5
-              periodSeconds: 10
-              timeoutSeconds: 3
-              failureThreshold: 3
-            }
-          ]
+          // probes: [
+          //   {
+          //     type: 'Liveness'
+          //     httpGet: {
+          //       path: '/health'
+          //       port: 8080
+          //       scheme: 'HTTP'
+          //     }
+          //     initialDelaySeconds: 30
+          //     periodSeconds: 30
+          //     timeoutSeconds: 5
+          //     failureThreshold: 3
+          //   }
+          //   {
+          //     type: 'Readiness'
+          //     httpGet: {
+          //       path: '/health/ready'
+          //       port: 8080
+          //       scheme: 'HTTP'
+          //     }
+          //     initialDelaySeconds: 5
+          //     periodSeconds: 10
+          //     timeoutSeconds: 3
+          //     failureThreshold: 3
+          //   }
+          // ]
         }
       ]
       scale: {

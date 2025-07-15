@@ -1,9 +1,5 @@
 using 'main.bicep'
 
-// Production Environment Parameters for Members Service
-param environment = 'prod'
-param appName = 'aspirichat'
-
 param applicationLandingZone = {
   resourceGroupName: 'aspirichat-lanzingzn-dev-rg'
   containerAppsEnvironmentName: 'aspirichat-cae-dev-jl2mqo4oottpk'
@@ -12,7 +8,6 @@ param applicationLandingZone = {
 }
 
 // Container configuration
-param containerImageTag = 'stable'
 param containerRegistryServer = 'docker.io'
 
 param tags = {

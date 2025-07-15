@@ -28,7 +28,6 @@ public class EventsControllerTests
         {
             Id = "member-123",
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = DateTime.UtcNow
         };
 
@@ -63,7 +62,6 @@ public class EventsControllerTests
         {
             Id = "member-123",
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = DateTime.UtcNow
         };
 

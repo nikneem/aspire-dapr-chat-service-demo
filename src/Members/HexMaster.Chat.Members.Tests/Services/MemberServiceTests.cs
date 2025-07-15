@@ -32,8 +32,7 @@ public class MemberServiceTests
         // Arrange
         var request = new RegisterMemberRequest
         {
-            Name = "Test User",
-            Email = "test@example.com"
+            Name = "Test User"
         };
 
         _mockRepository
@@ -54,13 +53,11 @@ public class MemberServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Test User", result.Name);
-        Assert.Equal("test@example.com", result.Email);
         Assert.True(result.IsActive);
         Assert.False(string.IsNullOrEmpty(result.Id));
 
         _mockRepository.Verify(x => x.CreateAsync(It.Is<MemberEntityDto>(
             m => m.Name == "Test User" &&
-                 m.Email == "test@example.com" &&
                  m.IsActive == true)), Times.Once);
 
         _mockDaprClient.Verify(x => x.PublishEventAsync(
@@ -68,7 +65,6 @@ public class MemberServiceTests
             Topics.MemberJoined,
             It.Is<MemberJoinedEvent>(e =>
                 e.Name == "Test User" &&
-                e.Email == "test@example.com" &&
                 !string.IsNullOrEmpty(e.Id) &&
                 e.JoinedAt > DateTime.MinValue),
             default), Times.Once);
@@ -83,7 +79,6 @@ public class MemberServiceTests
         {
             RowKey = memberId,
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = DateTime.UtcNow,
             LastActivityAt = DateTime.UtcNow,
             IsActive = true
@@ -100,7 +95,6 @@ public class MemberServiceTests
         Assert.NotNull(result);
         Assert.Equal(memberId, result.Id);
         Assert.Equal("Test User", result.Name);
-        Assert.Equal("test@example.com", result.Email);
         Assert.True(result.IsActive);
     }
 
@@ -130,7 +124,6 @@ public class MemberServiceTests
         {
             RowKey = memberId,
             Name = "Test User",
-            Email = "test@example.com",
             LastActivityAt = DateTime.UtcNow.AddMinutes(-30),
             IsActive = true
         };

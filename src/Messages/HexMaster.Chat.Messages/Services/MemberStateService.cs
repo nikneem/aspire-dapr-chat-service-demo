@@ -25,7 +25,6 @@ public class MemberStateService : IMemberStateService
         {
             Id = memberEvent.Id,
             Name = memberEvent.Name,
-            Email = memberEvent.Email,
             JoinedAt = memberEvent.JoinedAt,
             LastAccessAt = DateTime.UtcNow
         };
@@ -109,7 +108,6 @@ public class MemberStateService : IMemberStateService
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
         public DateTime JoinedAt { get; set; }
         public DateTime LastAccessAt { get; set; }
     }

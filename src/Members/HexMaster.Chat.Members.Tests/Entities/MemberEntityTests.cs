@@ -15,7 +15,6 @@ public class MemberEntityTests
         Assert.Equal("member", entity.PartitionKey);
         Assert.Equal(string.Empty, entity.RowKey);
         Assert.Equal(string.Empty, entity.Name);
-        Assert.Equal(string.Empty, entity.Email);
         Assert.False(entity.IsActive);
         Assert.Equal(default(DateTime), entity.JoinedAt);
         Assert.Equal(default(DateTime), entity.LastActivityAt);
@@ -34,7 +33,6 @@ public class MemberEntityTests
         // Act
         entity.RowKey = "test-id";
         entity.Name = "Test User";
-        entity.Email = "test@example.com";
         entity.JoinedAt = testDate;
         entity.LastActivityAt = testDate;
         entity.IsActive = true;
@@ -43,7 +41,6 @@ public class MemberEntityTests
         // Assert
         Assert.Equal("test-id", entity.RowKey);
         Assert.Equal("Test User", entity.Name);
-        Assert.Equal("test@example.com", entity.Email);
         Assert.Equal(testDate, entity.JoinedAt);
         Assert.Equal(testDate, entity.LastActivityAt);
         Assert.True(entity.IsActive);

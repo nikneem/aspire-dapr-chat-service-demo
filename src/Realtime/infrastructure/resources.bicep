@@ -23,8 +23,13 @@ var serviceBusTopics = [
   {
     name: 'message-sent'
   }
+  {
+    name: 'member-joined'
+  }
+  {
+    name: 'member-left'
+  }
 ]
-
 
 param containerPort int = 8080
 
@@ -49,8 +54,7 @@ module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.
   }
 }
 
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-messages-api:${containerImageTag}'
-
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-realtime-api:${containerImageTag}'
 
 // Members API Container App
 resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -59,7 +63,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   tags: tags
   identity: {
     type: 'SystemAssigned'
-  } 
+  }
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {

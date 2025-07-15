@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: messages-test-results
+          name: realtime-test-results
           path: TestResults/
           retention-days: 30
 
@@ -187,7 +187,7 @@ jobs:
           az deployment sub what-if \
             --location "${{ env.AZURE_LOCATION }}" \
             --template-file infrastructure/main.json \
-            --name "aspirichat-messages-$(date +%Y%m%d-%H%M%S)" \
+            --name "aspirichat-realtime-$(date +%Y%m%d-%H%M%S)" \
             --parameters infrastructure/main.dev.generated.json \
             --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
             --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
@@ -203,7 +203,7 @@ jobs:
             deployment_output=$(az deployment sub create \
               --location "${{ env.AZURE_LOCATION }}" \
               --template-file infrastructure/main.json \
-              --name "aspirichat-messages-$(date +%Y%m%d-%H%M%S)" \
+              --name "aspirichat-realtime-$(date +%Y%m%d-%H%M%S)" \
               --parameters infrastructure/main.dev.generated.json \
               --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
               --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \

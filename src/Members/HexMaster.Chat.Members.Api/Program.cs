@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add Azure Table Storage
-builder.AddAzureTableClient("tables");
+builder.AddAzureTableClient("memberstables");
 
 // Configure Dapr client with JSON serialization context for Native AOT
 builder.Services.AddSingleton<DaprClient>(serviceProvider =>

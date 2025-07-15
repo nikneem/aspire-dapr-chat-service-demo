@@ -106,10 +106,6 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: environment == 'prod' ? 'Production' : 'Development'
             }
             {
-              name: 'ASPNETCORE_URLS'
-              value: 'http://+:8080'
-            }
-            {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               secretRef: 'appinsights-connection-string'
             }
@@ -183,6 +179,20 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         ]
       }
     }
+  }
+}
+
+
+resource tableDataContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
+}
+
+resource tableDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourcegroup().id, membersContainerApp.id, tableDataContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: tableDataContributorRoleDefinition.id
+    principalId: membersContainerApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 

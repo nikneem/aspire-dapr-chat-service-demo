@@ -59,6 +59,9 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-app'
   location: location
   tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  } 
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {

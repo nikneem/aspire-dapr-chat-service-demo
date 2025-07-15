@@ -13,7 +13,6 @@ public class SharedModelsTests
         // Assert
         Assert.Equal(string.Empty, member.Id);
         Assert.Equal(string.Empty, member.Name);
-        Assert.Equal(string.Empty, member.Email);
         Assert.Equal(default(DateTime), member.JoinedAt);
         Assert.Equal(default(DateTime), member.LastActivityAt);
         Assert.False(member.IsActive);
@@ -30,7 +29,6 @@ public class SharedModelsTests
         {
             Id = "member-123",
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = now,
             LastActivityAt = now,
             IsActive = true
@@ -39,7 +37,6 @@ public class SharedModelsTests
         // Assert
         Assert.Equal("member-123", member.Id);
         Assert.Equal("Test User", member.Name);
-        Assert.Equal("test@example.com", member.Email);
         Assert.Equal(now, member.JoinedAt);
         Assert.Equal(now, member.LastActivityAt);
         Assert.True(member.IsActive);

@@ -83,7 +83,6 @@ public class EventsControllerTests
         {
             Id = "member-123",
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = DateTime.UtcNow
         };
 
@@ -91,7 +90,6 @@ public class EventsControllerTests
             .Setup(x => x.MemberJoined(
                 memberJoinedEvent.Id,
                 memberJoinedEvent.Name,
-                memberJoinedEvent.Email,
                 memberJoinedEvent.JoinedAt))
             .Returns(Task.CompletedTask);
 
@@ -104,7 +102,6 @@ public class EventsControllerTests
         _mockChatClient.Verify(x => x.MemberJoined(
             memberJoinedEvent.Id,
             memberJoinedEvent.Name,
-            memberJoinedEvent.Email,
             memberJoinedEvent.JoinedAt), Times.Once);
 
         // Verify information logging

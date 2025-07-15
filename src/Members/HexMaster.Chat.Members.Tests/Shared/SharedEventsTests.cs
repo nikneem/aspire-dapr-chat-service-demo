@@ -13,7 +13,6 @@ public class SharedEventsTests
         // Assert
         Assert.Equal(string.Empty, eventObj.Id);
         Assert.Equal(string.Empty, eventObj.Name);
-        Assert.Equal(string.Empty, eventObj.Email);
         Assert.Equal(default(DateTime), eventObj.JoinedAt);
     }
 
@@ -28,14 +27,12 @@ public class SharedEventsTests
         {
             Id = "member-123",
             Name = "Test User",
-            Email = "test@example.com",
             JoinedAt = now
         };
 
         // Assert
         Assert.Equal("member-123", eventObj.Id);
         Assert.Equal("Test User", eventObj.Name);
-        Assert.Equal("test@example.com", eventObj.Email);
         Assert.Equal(now, eventObj.JoinedAt);
     }
 

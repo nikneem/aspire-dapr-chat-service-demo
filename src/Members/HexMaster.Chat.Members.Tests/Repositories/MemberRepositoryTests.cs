@@ -33,8 +33,7 @@ public class MemberRepositoryTests
         var memberEntity = new MemberEntity
         {
             RowKey = memberId,
-            Name = "Test User",
-            Email = "test@example.com"
+            Name = "Test User"
         };
 
         var response = Response.FromValue(memberEntity, Mock.Of<Response>());
@@ -49,7 +48,6 @@ public class MemberRepositoryTests
         Assert.NotNull(result);
         Assert.Equal(memberId, result.RowKey);
         Assert.Equal("Test User", result.Name);
-        Assert.Equal("test@example.com", result.Email);
     }
 
     [Fact]
@@ -77,8 +75,7 @@ public class MemberRepositoryTests
         var memberEntityDto = new MemberEntityDto
         {
             RowKey = "test-id",
-            Name = "Test User",
-            Email = "test@example.com"
+            Name = "Test User"
         };
 
         var response = Mock.Of<Response>();
@@ -92,7 +89,6 @@ public class MemberRepositoryTests
         // Assert
         Assert.Equal(memberEntityDto.RowKey, result.RowKey);
         Assert.Equal(memberEntityDto.Name, result.Name);
-        Assert.Equal(memberEntityDto.Email, result.Email);
         _mockTableClient.Verify(x => x.AddEntityAsync(It.IsAny<MemberEntity>(), default), Times.Once);
     }
 
@@ -104,7 +100,6 @@ public class MemberRepositoryTests
         {
             RowKey = "test-id",
             Name = "Updated User",
-            Email = "updated@example.com",
             ETag = new ETag("test-etag")
         };
 
@@ -119,7 +114,6 @@ public class MemberRepositoryTests
         // Assert
         Assert.Equal(memberEntityDto.RowKey, result.RowKey);
         Assert.Equal(memberEntityDto.Name, result.Name);
-        Assert.Equal(memberEntityDto.Email, result.Email);
         _mockTableClient.Verify(x => x.UpdateEntityAsync(It.IsAny<MemberEntity>(), It.IsAny<ETag>(), TableUpdateMode.Merge, default), Times.Once);
     }
 

@@ -76,10 +76,9 @@
 
       async function registerMember() {
         const name = document.getElementById("nameInput").value.trim();
-        const email = document.getElementById("emailInput").value.trim();
 
-        if (!name || !email) {
-          alert("Please enter both name and email");
+        if (!name) {
+          alert("Please enter your name");
           return;
         }
 
@@ -90,7 +89,7 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ name, email }),
+            body: JSON.stringify({ name }),
           });
 
           if (!response.ok) {
@@ -104,7 +103,6 @@
           await connectToSignalR();
 
           document.getElementById("nameInput").disabled = true;
-          document.getElementById("emailInput").disabled = true;
           document.getElementById("registerBtn").disabled = true;
           document.getElementById("messageInput").disabled = false;
           document.getElementById("sendBtn").disabled = false;
@@ -131,7 +129,7 @@
           }
         );
 
-        connection.on("MemberJoined", (id, name, email, joinedAt) => {
+        connection.on("MemberJoined", (id, name, joinedAt) => {
           addSystemMessage(`${name} joined the chat`);
         });
 

@@ -41,7 +41,6 @@ public class EventsController(
         await hubContext.Clients.Group("ChatRoom").MemberJoined(
             memberJoinedEvent.Id,
             memberJoinedEvent.Name,
-            memberJoinedEvent.Email,
             memberJoinedEvent.JoinedAt);
 
         return Ok();

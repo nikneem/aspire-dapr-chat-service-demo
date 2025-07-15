@@ -71,7 +71,6 @@ public class MemberRepository : IMemberRepository
             Timestamp = entity.Timestamp,
             ETag = entity.ETag,
             Name = entity.Name,
-            Email = entity.Email,
             JoinedAt = entity.JoinedAt,
             LastActivityAt = entity.LastActivityAt,
             IsActive = entity.IsActive
@@ -87,7 +86,6 @@ public class MemberRepository : IMemberRepository
             Timestamp = dto.Timestamp,
             ETag = dto.ETag,
             Name = dto.Name,
-            Email = dto.Email,
             JoinedAt = dto.JoinedAt,
             LastActivityAt = dto.LastActivityAt,
             IsActive = dto.IsActive

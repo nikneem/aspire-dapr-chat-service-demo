@@ -12,7 +12,6 @@ public class SharedRequestsTests
 
         // Assert
         Assert.Equal(string.Empty, request.Name);
-        Assert.Equal(string.Empty, request.Email);
     }
 
     [Fact]
@@ -21,13 +20,11 @@ public class SharedRequestsTests
         // Act
         var request = new RegisterMemberRequest
         {
-            Name = "Test User",
-            Email = "test@example.com"
+            Name = "Test User"
         };
 
         // Assert
         Assert.Equal("Test User", request.Name);
-        Assert.Equal("test@example.com", request.Email);
     }
 
     [Fact]

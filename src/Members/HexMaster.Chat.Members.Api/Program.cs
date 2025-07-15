@@ -31,9 +31,9 @@ app.UseCors();
 // API endpoints
 app.MapPost("/members", async (RegisterMemberRequest request, IMemberService memberService) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email))
+    if (string.IsNullOrWhiteSpace(request.Name))
     {
-        return Results.BadRequest("Name and email are required");
+        return Results.BadRequest("Name is required");
     }
 
     var member = await memberService.RegisterMemberAsync(request);

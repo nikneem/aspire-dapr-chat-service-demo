@@ -5,7 +5,7 @@ namespace HexMaster.Chat.Realtime.Api.Hubs;
 public interface IChatClient
 {
     Task ReceiveMessage(string id, string content, string senderId, string senderName, DateTime sentAt);
-    Task MemberJoined(string id, string name, string email, DateTime joinedAt);
+    Task MemberJoined(string id, string name, DateTime joinedAt);
     Task MemberLeft(string id, string name, DateTime leftAt);
 }
 

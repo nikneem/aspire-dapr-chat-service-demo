@@ -33,7 +33,6 @@ public class MemberService : IMemberService
         {
             RowKey = memberId,
             Name = request.Name,
-            Email = request.Email,
             JoinedAt = now,
             LastActivityAt = now,
             IsActive = true
@@ -46,7 +45,6 @@ public class MemberService : IMemberService
         {
             Id = memberId,
             Name = request.Name,
-            Email = request.Email,
             JoinedAt = now
         };
 
@@ -61,7 +59,6 @@ public class MemberService : IMemberService
         {
             Id = memberId,
             Name = request.Name,
-            Email = request.Email,
             JoinedAt = now,
             LastActivityAt = now,
             IsActive = true
@@ -78,7 +75,6 @@ public class MemberService : IMemberService
         {
             Id = memberEntity.RowKey,
             Name = memberEntity.Name,
-            Email = memberEntity.Email,
             JoinedAt = memberEntity.JoinedAt,
             LastActivityAt = memberEntity.LastActivityAt,
             IsActive = memberEntity.IsActive

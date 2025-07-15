@@ -60,7 +60,7 @@ resource clientContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             {
               name: 'NODE_ENV'
-              value: tags.Environment == 'Prod' ? 'production' : 'development'
+              value: 'production'
             }
             {
               name: 'PORT'

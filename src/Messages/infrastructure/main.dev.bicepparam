@@ -1,9 +1,5 @@
 using 'main.bicep'
 
-// Development Environment Parameters for Members Service
-param environment = 'dev'
-param appName = 'aspirichat'
-
 // These values should be provided during deployment or from Azure DevOps/GitHub Actions variables
 // Container Apps Environment ID from shared infrastructure deployment
 param applicationLandingZone = {
@@ -15,15 +11,14 @@ param applicationLandingZone = {
 
 
 // Container configuration
-param containerImageTag = 'latest'
 param containerRegistryServer = 'docker.io'
 
 param tags = {
-  Environment: 'Development'
+  Environment: 'Dev'
   Application: 'HexMaster Chat'
   Service: 'Messages'
   CreatedBy: 'Bicep'
   Owner: 'Development Team'
   CostCenter: 'Engineering'
-  Project: 'AspireChat'
+  Project: 'AspiChat'
 }

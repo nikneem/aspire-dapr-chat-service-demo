@@ -1,16 +1,17 @@
+@description('Name of the service')
+param serviceName string
+
+@description('Default resource name prefix for all resources')
+param defaultResourceName string
+
 @description('The location for all resources')
 param location string = resourceGroup().location
 
-@description('Environment name (dev, staging, prod)')
-param environment string
-
-@description('Container App name')
-param containerAppName string
-
+@description('Application landing zone configuration')
 param applicationLandingZone object
 
 @description('Container image tag or version')
-param containerImageTag string = 'latest'
+param containerImageTag string
 
 @description('Container registry server')
 param containerRegistryServer string
@@ -32,12 +33,9 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
 }
 
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
-var storageAccountName = uniqueString(containerAppName)
-
-var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=core.windows.net'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
-  name: storageAccountName
+  name: uniqueString(defaultResourceName)
   location: location
   tags: tags
   sku: {
@@ -57,8 +55,8 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
 }
 
 // Members API Container App
-resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
-  name: containerAppName
+resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
+  name: '${defaultResourceName}-app'
   location: location
   tags: tags
   properties: {
@@ -88,7 +86,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       }
       dapr: {
         enabled: true
-        appId: 'members-api'
+        appId: serviceName
         appProtocol: 'http'
         appPort: 8080
         logLevel: 'info'
@@ -98,12 +96,12 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
     template: {
       containers: [
         {
-          name: 'members-api'
+          name: serviceName
           image: containerImageName
           env: [
             {
               name: 'ASPNETCORE_ENVIRONMENT'
-              value: environment == 'prod' ? 'Production' : 'Development'
+              value: tags.Environment == 'prod' ? 'Production' : 'Development'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -119,7 +117,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'HealthChecks__Enabled'
-              value: 'true'
+              value: 'false'
             }
           ]
           resources: {
@@ -182,22 +180,26 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-
-resource tableDataContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
-  name: '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
+module appConfigRoleAssignment '../../../infrastructure/shared/role-assignment-app-configuration.bicep' = {
+  name: '${defaultResourceName}-appcfg-module'
+  scope: resourceGroup(applicationLandingZone.resourceGroup)
+  params: {
+    containerAppPrincipalId: apiContainerApp.identity.principalId
+    systemName: serviceName
+  }
 }
-
-resource tableDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, membersContainerApp.id, tableDataContributorRoleDefinition.id)
-  properties: {
-    roleDefinitionId: tableDataContributorRoleDefinition.id
-    principalId: membersContainerApp.identity.principalId
-    principalType: 'ServicePrincipal'
+module tableDataRoleAssignment '../../../infrastructure/shared/role-assignment-table-data-contrib.bicep' = {
+  name: '${defaultResourceName}-tablecontrib-module'
+  params: {
+    containerAppPrincipalId: apiContainerApp.identity.principalId
+    systemName: serviceName
   }
 }
 
+
+
 // Outputs
-output containerAppName string = membersContainerApp.name
-output containerAppUrl string = 'https://${membersContainerApp.properties.configuration.ingress.fqdn}'
-output containerAppFqdn string = membersContainerApp.properties.configuration.ingress.fqdn
-output containerAppId string = membersContainerApp.id
+output containerAppName string = apiContainerApp.name
+output containerAppUrl string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
+output containerAppFqdn string = apiContainerApp.properties.configuration.ingress.fqdn
+output containerAppId string = apiContainerApp.id

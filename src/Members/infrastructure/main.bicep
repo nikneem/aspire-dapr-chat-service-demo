@@ -6,12 +6,6 @@ param location string = deployment().location
 @description('Tags to apply to all resources')
 param tags object = {}
 
-@description('Environment name (dev, staging, prod)')
-param environment string
-
-@description('Application name prefix')
-param appName string
-
 param applicationLandingZone object
 
 @description('Container image tag or version')
@@ -20,34 +14,29 @@ param containerImageTag string = 'latest'
 @description('Container registry server')
 param containerRegistryServer string
 
-var resourceGroupName = '${appName}-members-${environment}-rg'
-var containerAppName = '${appName}-members-${environment}'
+var serviceName = toLower('${tags.Project}-${tags.Service}')
+var defaultResourceName = toLower('${serviceName}-${tags.Environment}')
+var resourceGroupName = '${defaultResourceName}-rg'
 
 // Create Resource Group for Members service
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
-  tags: union(tags, {
-    Service: 'Members'
-    Component: 'API'
-  })
+  tags: tags
 }
 
 // Deploy Members Container App
-module membersApp 'members-app.bicep' = {
+module membersApp 'resources.bicep' = {
   name: 'members-app-deployment'
   scope: resourceGroup
   params: {
+    serviceName: serviceName
+    defaultResourceName: defaultResourceName
     location: location
-    environment: environment
-    containerAppName: containerAppName
     applicationLandingZone: applicationLandingZone
     containerImageTag: containerImageTag
     containerRegistryServer: containerRegistryServer
-    tags: union(tags, {
-      Service: 'Members'
-      Component: 'API'
-    })
+    tags: tags
   }
 }
 

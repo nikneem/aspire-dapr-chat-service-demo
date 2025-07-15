@@ -61,7 +61,7 @@ jobs:
           useConfigFile: true
 
   test:
-    name: Test Members API
+    name: Run unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -83,12 +83,12 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ${{ env.TESTS_PROJECT_PATH }}
 
-      - name: Build Members API and Tests
+      - name: Build API and Tests
         run: |
           dotnet build ${{ env.API_PROJECT_PATH }} --no-restore --configuration Release
           dotnet build ${{ env.TESTS_PROJECT_PATH }} --no-restore --configuration Release
 
-      - name: Run Members API Tests
+      - name: Run API Tests
         run: |
           dotnet test ${{ env.TESTS_PROJECT_PATH }} \
             --no-build \
@@ -102,14 +102,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: members-test-results
+          name: messages-test-results
           path: TestResults/
           retention-days: 30
 
   build-and-push:
     name: Build and Push Container
     runs-on: ubuntu-latest
-    needs: [versionize]
+    needs: [versionize, test]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -132,14 +132,14 @@ jobs:
   prepare-infrastructure:
     name: Prepare Infrastructure
     runs-on: ubuntu-latest
-    needs: [versionize]
+    needs: [versionize, test]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Validate Bicep templates
         run: |
-          echo "Validating Members API Bicep templates..."
+          echo "Validating API Bicep templates..."
           cd ${{ env.INFRASTRUCTURE_PATH }}
           
           echo "Building main.bicep..."
@@ -156,7 +156,7 @@ jobs:
       - name: Upload Development Infrastructure Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: members-infrastructure-dev
+          name: infrastructure-dev
           path: |
             ${{ env.INFRASTRUCTURE_PATH }}/*.json
           retention-days: 30
@@ -164,13 +164,13 @@ jobs:
   deploy-dev:
     name: Deploy to Development
     runs-on: ubuntu-latest
-    needs: [prepare-infrastructure, versionize, test]
+    needs: [prepare-infrastructure, versionize, build-and-push]
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     steps:
       - name: Download Infrastructure Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: members-infrastructure-dev
+          name: infrastructure-dev
           path: infrastructure/
 
       - name: Azure CLI Login
@@ -183,31 +183,34 @@ jobs:
       - name: What-If Deployment (Development)
         id: whatif-dev
         run: |
-          echo "Running what-if analysis for Members API development environment..."
+          echo "Running what-if analysis for API development environment..."
           az deployment sub what-if \
             --location "${{ env.AZURE_LOCATION }}" \
             --template-file infrastructure/main.json \
-            --name "aspirichat-members-$(date +%Y%m%d-%H%M%S)" \
+            --name "aspirichat-messages-$(date +%Y%m%d-%H%M%S)" \
             --parameters infrastructure/main.dev.generated.json \
             --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
             --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
             --output table
 
-      - name: Deploy to Development
-        id: deploy
-        run: |
-          echo "Deploying Members API to development environment..."
-          deployment_output=$(az deployment sub create \
-            --location "${{ env.AZURE_LOCATION }}" \
-            --template-file infrastructure/main.json \
-            --name "aspirichat-members-$(date +%Y%m%d-%H%M%S)" \
-            --parameters infrastructure/main.dev.generated.json \
-            --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
-            --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-            --output json)
+
+      - name: Azure CLI script
+        uses: azure/cli@v2
+        with:
+          azcliversion: '2.72.0'
+          inlineScript: |
+            echo "Deploying API to development environment..."
+            deployment_output=$(az deployment sub create \
+              --location "${{ env.AZURE_LOCATION }}" \
+              --template-file infrastructure/main.json \
+              --name "aspirichat-messages-$(date +%Y%m%d-%H%M%S)" \
+              --parameters infrastructure/main.dev.generated.json \
+              --parameters containerImageTag="${{ needs.versionize.outputs.assemblySemFileVer }}" \
+              --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
+              --output json)
           
-          echo "Deployment completed successfully!"
-          echo "$deployment_output" | jq '.'
+            echo "Deployment completed successfully!"
+            echo "$deployment_output" | jq '.'
 
       - name: Comment PR with deployment info
         if: github.event_name == 'pull_request'
@@ -215,7 +218,7 @@ jobs:
         with:
           script: |
             const deploymentInfo = `
-            ## Members API Deployment to Development Environment ✅
+            ## API Deployment to Development Environment ✅
             
             **Container Image:** \`${{ steps.image-info.outputs.full-image }}\`
             **Environment:** Development
@@ -234,84 +237,3 @@ jobs:
               repo: context.repo.repo,
               body: deploymentInfo
             });
-
-  # deploy-prod:
-  #   name: Deploy to Production
-  #   runs-on: ubuntu-latest
-  #   needs: [test, build-and-push, prepare-infrastructure]
-  #   if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[deploy-prod]'))
-  #   environment: 
-  #     name: production
-  #     url: ${{ steps.deploy.outputs.app-url }}
-  #   steps:
-  #     - name: Download Infrastructure Artifacts
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ needs.prepare-infrastructure.outputs.prod-artifact-name }}
-  #         path: infrastructure/
-
-  #     - name: Azure CLI Login
-  #       uses: azure/login@v1
-  #       with:
-  #         client-id: ${{ secrets.AZURE_PROD_CLIENT_ID }}
-  #         tenant-id: ${{ secrets.AZURE_PROD_TENANT_ID }}
-  #         subscription-id: ${{ secrets.AZURE_PROD_SUBSCRIPTION_ID }}
-
-  #     - name: Extract container image tag
-  #       id: image-info
-  #       run: |
-  #         # Extract the image tag from the build job output
-  #         IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
-  #         echo "Full image tag: $IMAGE_TAG"
-          
-  #         # Extract just the tag part (after the last colon)
-  #         TAG_ONLY=$(echo "$IMAGE_TAG" | sed 's/.*://')
-  #         echo "tag-only=$TAG_ONLY" >> $GITHUB_OUTPUT
-  #         echo "full-image=$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-  #     - name: What-If Deployment (Production)
-  #       id: whatif-prod
-  #       run: |
-  #         echo "Running what-if analysis for Members API production environment..."
-  #         az deployment sub what-if \
-  #           --location "${{ env.AZURE_LOCATION }}" \
-  #           --template-file infrastructure/main.json \
-  #           --parameters infrastructure/main.prod.generated.json \
-  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
-  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
-  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
-  #           --output table
-
-  #     - name: Deploy to Production
-  #       id: deploy
-  #       run: |
-  #         echo "Deploying Members API to production environment..."
-  #         deployment_output=$(az deployment sub create \
-  #           --location "${{ env.AZURE_LOCATION }}" \
-  #           --template-file infrastructure/main.json \
-  #           --parameters infrastructure/main.prod.generated.json \
-  #           --parameters containerImageTag="${{ steps.image-info.outputs.tag-only }}" \
-  #           --parameters containerRegistryServer="${{ secrets.CONTAINER_REGISTRY_SERVER }}" \
-  #           --parameters containerRegistryUsername="${{ secrets.CONTAINER_REGISTRY_USERNAME }}" \
-  #           --parameters containerRegistryPassword="${{ secrets.CONTAINER_REGISTRY_PASSWORD }}" \
-  #           --output json)
-          
-  #         echo "Production deployment completed successfully!"
-  #         echo "$deployment_output" | jq '.'
-          
-  #         # Extract the app URL if available in outputs
-  #         app_url=$(echo "$deployment_output" | jq -r '.properties.outputs.appUrl.value // empty')
-  #         if [ ! -z "$app_url" ]; then
-  #           echo "app-url=$app_url" >> $GITHUB_OUTPUT
-  #         fi
-
-  # cleanup:
-  #   name: Cleanup
-  #   runs-on: ubuntu-latest
-  #   needs: [deploy-dev, deploy-prod]
-  #   if: always()
-  #   steps:
-  #     - name: Clean up temporary artifacts
-  #       run: |
-  #         echo "Workflow completed. Temporary artifacts will be automatically cleaned up based on retention policy."

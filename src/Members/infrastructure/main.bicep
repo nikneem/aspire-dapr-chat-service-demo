@@ -41,7 +41,7 @@ module membersApp 'resources.bicep' = {
 }
 
 // Outputs
-output resourceGroupName string = resourceGroup.name
+output resourceGroupName string = targetResourceGroup.name
 output containerAppName string = membersApp.outputs.containerAppName
 output containerAppUrl string = membersApp.outputs.containerAppUrl
 output containerAppFqdn string = membersApp.outputs.containerAppFqdn

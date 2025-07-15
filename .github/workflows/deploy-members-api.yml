@@ -61,7 +61,7 @@ jobs:
           useConfigFile: true
 
   test:
-    name: Test Members API
+    name: Test ${{ env.IMAGE_NAME }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

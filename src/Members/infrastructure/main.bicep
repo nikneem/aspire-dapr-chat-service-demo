@@ -19,7 +19,7 @@ var defaultResourceName = toLower('${serviceName}-${tags.Environment}')
 var resourceGroupName = '${defaultResourceName}-rg'
 
 // Create Resource Group for Members service
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource targetResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
   tags: tags
@@ -28,7 +28,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 // Deploy Members Container App
 module membersApp 'resources.bicep' = {
   name: 'members-app-deployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     serviceName: serviceName
     defaultResourceName: defaultResourceName

@@ -182,7 +182,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
 
 module appConfigRoleAssignment '../../../infrastructure/shared/role-assignment-app-configuration.bicep' = {
   name: '${defaultResourceName}-appcfg-module'
-  scope: resourceGroup(applicationLandingZone.resourceGroup)
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
   params: {
     containerAppPrincipalId: apiContainerApp.identity.principalId
     systemName: serviceName

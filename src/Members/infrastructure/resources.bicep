@@ -196,9 +196,6 @@ module tableDataRoleAssignment '../../../infrastructure/shared/role-assignment-t
   }
 }
 
-
-
-// Outputs
 output containerAppName string = apiContainerApp.name
 output containerAppUrl string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
 output containerAppFqdn string = apiContainerApp.properties.configuration.ingress.fqdn

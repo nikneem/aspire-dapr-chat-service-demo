@@ -68,7 +68,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       secrets: [
         {
           name: 'table-storage-connection-string'
-          value: storageAccountConnectionString
+          value: storageAccount.properties.primaryEndpoints.table
         }
         {
           name: 'appinsights-connection-string'
@@ -118,7 +118,7 @@ resource membersContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: azureAppConfiguration.properties.endpoint
             }
             {
-              name: 'ConnectionStrings__TableStorage'
+              name: 'ConnectionStrings__memberstables'
               secretRef: 'table-storage-connection-string'
             }
             {

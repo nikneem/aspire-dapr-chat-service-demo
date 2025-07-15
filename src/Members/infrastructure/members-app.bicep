@@ -188,7 +188,7 @@ resource tableDataContributorRoleDefinition 'Microsoft.Authorization/roleDefinit
 }
 
 resource tableDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourcegroup().id, membersContainerApp.id, tableDataContributorRoleDefinition.id)
+  name: guid(resourceGroup().id, membersContainerApp.id, tableDataContributorRoleDefinition.id)
   properties: {
     roleDefinitionId: tableDataContributorRoleDefinition.id
     principalId: membersContainerApp.identity.principalId

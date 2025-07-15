@@ -15,7 +15,6 @@ param applicationLandingZone = {
 
 
 // Container configuration
-param containerImageTag = 'latest'
 param containerRegistryServer = 'docker.io'
 
 param tags = {

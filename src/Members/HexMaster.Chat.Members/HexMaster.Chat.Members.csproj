@@ -7,14 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.3" />
-    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.15.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
+    <ProjectReference Include="..\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
     <ProjectReference Include="..\..\Shared\HexMaster.Chat.Shared\HexMaster.Chat.Shared.csproj" />
   </ItemGroup>
 

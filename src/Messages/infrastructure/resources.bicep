@@ -132,7 +132,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
               value: azureAppConfiguration.properties.endpoint
             }
             {
-              name: 'ConnectionStrings__tables'
+              name: 'ConnectionStrings__messagestables'
               secretRef: 'table-storage-connection-string'
             }
             {

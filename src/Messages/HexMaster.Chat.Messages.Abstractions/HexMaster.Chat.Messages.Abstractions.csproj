@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.3" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference
-      Include="..\..\Members\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Members\HexMaster.Chat.Members.Abstractions\HexMaster.Chat.Members.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add Azure Table Storage
-builder.AddAzureTableClient("tables");
+builder.AddAzureTableClient("memberstables");
 
 // Add chat members services
 builder.AddChatMembers();

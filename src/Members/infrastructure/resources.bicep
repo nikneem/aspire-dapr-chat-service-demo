@@ -19,8 +19,16 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
-
 param containerPort int = 8080
+
+var serviceBusTopics = [
+  {
+    name: 'member-joined'
+  }
+  {
+    name: 'member-left'
+  }
+]
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
@@ -33,6 +41,14 @@ resource azureAppConfiguration 'Microsoft.AppConfiguration/configurationStores@2
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.applicationInsightsName
+}
+module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
+  name: '${serviceName}-sb-topics'
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  params: {
+    landingzoneEnvironment: applicationLandingZone
+    topics: serviceBusTopics
+  }
 }
 
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'

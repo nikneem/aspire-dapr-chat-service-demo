@@ -23,6 +23,9 @@ var appInsightsName = '${appName}-ai-${environment}-${uniqueSuffix}'
 var appConfigName = '${appName}-ac-${environment}-${uniqueSuffix}'
 var redisCacheName = '${appName}-redis-${environment}-${uniqueSuffix}'
 
+var daprStateStoreName = 'chatservice-statestore'
+var daprPubSubName = 'chatservice-pubsub'
+
 // Log Analytics Workspace
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: logAnalyticsWorkspaceName
@@ -69,6 +72,15 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
     disableLocalAuth: false
     zoneRedundant: false
   }
+    resource accessPolicies 'AuthorizationRules' = {
+    name: 'DaprComponentPolicy'
+    properties: {
+      rights: [
+        'Send'
+        'Listen'
+      ]
+    }
+  }
 }
 
 // Container Apps Environment
@@ -93,6 +105,64 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
       }
     ]
     zoneRedundant: false
+  }
+    resource stateStoreComponent 'daprComponents' = {
+    name: daprStateStoreName
+    properties: {
+      componentType: 'state.redis'
+      version: 'v1'
+      secrets: [
+        {
+          name: 'redispassword'
+          value: redisCache.listKeys().primaryKey
+        }
+      ]
+      metadata: [
+        {
+          name: 'redisHost'
+          value: '${redisCache.properties.hostName}:${redisCache.properties.sslPort}'
+        }
+        {
+          name: 'redisDB'
+          value: '0'
+        }
+        {
+          name: 'redisPassword'
+          secretRef: 'redispassword'
+        }
+        {
+          name: 'enableTLS'
+          value: 'true'
+        }
+        {
+          name: 'keyPrefix'
+          value: 'none'
+        }
+      ]
+    }
+  }
+  resource pubsubComponent 'daprComponents' = {
+    name: daprPubSubName
+    properties: {
+      componentType: 'pubsub.azure.servicebus.topics'
+      version: 'v1'
+      secrets: [
+        {
+          name: 'servicebusnamespace'
+          value: serviceBusNamespace::accessPolicies.listKeys().primaryConnectionString
+        }
+      ]
+      metadata: [
+        {
+          name: 'connectionString'
+          secretRef: 'servicebusnamespace'
+        }
+        {
+          name: 'maxConcurrentHandlers'
+          value: '3'
+        }
+      ]
+    }
   }
 }
 

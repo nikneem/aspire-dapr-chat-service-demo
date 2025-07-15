@@ -12,10 +12,8 @@ resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/topics@2024-01-01' = [
     properties: {
       defaultMessageTimeToLive: 'P7D'
       enablePartitioning: false
-      duplicateDetectionHistoryTimeWindow: empty(queue.duplicateDetectionTimeWindow)
-        ? 'PT10M'
-        : queue.duplicateDetectionTimeWindow
-      requiresDuplicateDetection: !empty(queue.duplicateDetectionTimeWindow)
+      duplicateDetectionHistoryTimeWindow: 'PT10M'
+      requiresDuplicateDetection: false
     }
   }
 ]

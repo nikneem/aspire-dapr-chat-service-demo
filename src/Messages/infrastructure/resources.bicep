@@ -19,6 +19,12 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
+var serviceBusTopics = [
+  {
+    name: 'message-sent'
+  }
+]
+
 
 param containerPort int = 8080
 
@@ -33,6 +39,14 @@ resource azureAppConfiguration 'Microsoft.AppConfiguration/configurationStores@2
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.applicationInsightsName
+}
+module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
+  name: '${serviceName}-sb-topics'
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  params: {
+    landingzoneEnvironment: applicationLandingZone
+    topics: serviceBusTopics
+  }
 }
 
 var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-messages-api:${containerImageTag}'

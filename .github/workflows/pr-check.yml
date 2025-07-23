@@ -49,8 +49,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nikneem_aspire-dapr-chat-service-demo" /o:"nikneem" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:"sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nikneem_aspire-dapr-chat-service-demo" /o:"nikneem" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:"sonar.cs.opencover.reportsPaths=TestResults/**/coverage.opencover.xml"
           dotnet restore src
           dotnet build src --no-incremental
-          dotnet test src --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover"
+          dotnet test src --no-restore --configuration Release --collect:"XPlat Code Coverage;Format=opencover" --results-directory TestResults
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

@@ -28,7 +28,13 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
   name: applicationLandingZone.containerAppsEnvironmentName
 }
 
-resource clientContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
+// resource containerAppDomainCertificate'Microsoft.App/managedEnvironments/certificates@2024-03-01' = {
+//   name: 'chat-hexmaster-nl'
+//   location: location
+//   properties:{password:}
+// }
+
+resource clientContainerApp 'Microsoft.App/containerApps@2025-02-02-preview' = {
   name: '${defaultResourceName}-app'
   location: location
   identity: {
@@ -49,7 +55,14 @@ resource clientContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             latestRevision: true
           }
         ]
+        customDomains: [
+          {
+            name: 'chat.hexmaster.nl'
+            bindingType: 'Auto'
+          }
+        ]
       }
+
     }
     template: {
       containers: [

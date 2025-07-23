@@ -26,11 +26,7 @@ public class MemberService : IMemberService
 
     public async Task<ChatMemberDto> RegisterMemberAsync(RegisterMemberRequest request)
     {
-        if (request == null)
-            throw new ArgumentNullException(nameof(request));
-        
-        if (string.IsNullOrWhiteSpace(request.Name))
-            throw new ArgumentException("Member name {Name} cannot be null or empty.", nameof(request.Name));
+        ArgumentException.ThrowIfNullOrEmpty(request?.Name, nameof(request.Name));
 
         var memberId = Guid.NewGuid().ToString();
         var now = DateTime.UtcNow;

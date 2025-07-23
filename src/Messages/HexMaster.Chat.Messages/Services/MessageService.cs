@@ -143,7 +143,7 @@ public class MessageService : IMessageService
         var expiredMessages = await _repository.GetExpiredMessagesAsync(cutoffTime);
 
         var messageIds = expiredMessages.Select(m => m.RowKey).ToList();
-        if (messageIds.Any())
+        if (messageIds.Count > 0)
         {
             await _repository.DeleteBatchAsync(messageIds);
             _logger.LogInformation("Removed {Count} expired messages", messageIds.Count);

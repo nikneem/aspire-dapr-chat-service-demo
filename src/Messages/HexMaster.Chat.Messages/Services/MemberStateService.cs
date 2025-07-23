@@ -108,7 +108,6 @@ public class MemberStateService : IMemberStateService
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public DateTime JoinedAt { get; set; }
         public DateTime LastAccessAt { get; set; }
     }
 }

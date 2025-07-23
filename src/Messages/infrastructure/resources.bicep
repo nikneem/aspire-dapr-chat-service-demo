@@ -27,6 +27,7 @@ var serviceBusTopics = [
   }
 ]
 
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-messages-api:${containerImageTag}'
 
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
@@ -49,8 +50,6 @@ module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.
     topics: serviceBusTopics
   }
 }
-
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-messages-api:${containerImageTag}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: uniqueString(defaultResourceName)

@@ -33,6 +33,8 @@ var serviceBusTopics = [
   }
 ]
 
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-realtime-api:${containerImageTag}'
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
@@ -53,8 +55,6 @@ module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.
     topics: serviceBusTopics
   }
 }
-
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-realtime-api:${containerImageTag}'
 
 // Members API Container App
 resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {

@@ -21,7 +21,7 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
     {
         // Arrange
         var hubUrl = $"{_client.BaseAddress}chathub";
-        
+
         // Act & Assert
         var connection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
@@ -32,7 +32,7 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
 
         await connection.StartAsync();
         Assert.Equal(HubConnectionState.Connected, connection.State);
-        
+
         await connection.DisposeAsync();
     }
 
@@ -75,7 +75,7 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         Assert.True(messageReceived);
         Assert.Equal("TestUser", receivedSender);
         Assert.Equal("Hello, World!", receivedMessage);
-        
+
         await connection.DisposeAsync();
     }
 
@@ -95,8 +95,9 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
 
         // Act & Assert - should not throw
         await connection.InvokeAsync("JoinGroup", "TestGroup");
-        
+
         await connection.DisposeAsync();
+        Assert.NotNull(hubUrl);
     }
 
     [Fact]
@@ -116,8 +117,9 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         // Act & Assert - should not throw
         await connection.InvokeAsync("JoinGroup", "TestGroup");
         await connection.InvokeAsync("LeaveGroup", "TestGroup");
-        
+
         await connection.DisposeAsync();
+        Assert.NotNull(hubUrl);
     }
 
     [Fact]
@@ -168,7 +170,7 @@ public class RealtimeApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         // Assert - both connections should receive the message
         Assert.True(connection1MessageReceived);
         Assert.True(connection2MessageReceived);
-        
+
         await connection1.DisposeAsync();
         await connection2.DisposeAsync();
     }

@@ -15,6 +15,11 @@ namespace HexMaster.Chat.Messages.Tests.Integration;
 
 public class MessagesApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+    
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
@@ -88,10 +93,7 @@ public class MessagesApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         Assert.StartsWith("/messages/", location);
         
         var responseContent = await response.Content.ReadAsStringAsync();
-        var message = JsonSerializer.Deserialize<ChatMessageDto>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var message = JsonSerializer.Deserialize<ChatMessageDto>(responseContent, JsonOptions);
         
         Assert.NotNull(message);
         Assert.Equal("Hello, World!", message.Content);
@@ -282,10 +284,7 @@ public class MessagesApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var responseContent = await response.Content.ReadAsStringAsync();
-        var messages = JsonSerializer.Deserialize<List<ChatMessageDto>>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var messages = JsonSerializer.Deserialize<List<ChatMessageDto>>(responseContent, JsonOptions);
         
         Assert.NotNull(messages);
         Assert.Equal(2, messages.Count);
@@ -358,10 +357,7 @@ public class MessagesApiIntegrationTests : IClassFixture<WebApplicationFactory<P
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var responseContent = await response.Content.ReadAsStringAsync();
-        var messages = JsonSerializer.Deserialize<List<ChatMessageDto>>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var messages = JsonSerializer.Deserialize<List<ChatMessageDto>>(responseContent, JsonOptions);
         
         Assert.NotNull(messages);
         Assert.Single(messages);

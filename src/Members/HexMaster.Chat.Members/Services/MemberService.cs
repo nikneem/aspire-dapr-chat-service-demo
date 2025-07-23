@@ -30,7 +30,7 @@ public class MemberService : IMemberService
             throw new ArgumentNullException(nameof(request));
         
         if (string.IsNullOrWhiteSpace(request.Name))
-            throw new ArgumentException("Member name cannot be null or empty.", nameof(request.Name));
+            throw new ArgumentException("Member name {Name} cannot be null or empty.", nameof(request.Name));
 
         var memberId = Guid.NewGuid().ToString();
         var now = DateTime.UtcNow;

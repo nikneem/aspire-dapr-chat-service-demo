@@ -15,6 +15,11 @@ namespace HexMaster.Chat.Members.Tests.Integration;
 
 public class MembersApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+    
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
@@ -74,10 +79,7 @@ public class MembersApiIntegrationTests : IClassFixture<WebApplicationFactory<Pr
         Assert.StartsWith("/members/", location);
         
         var responseContent = await response.Content.ReadAsStringAsync();
-        var member = JsonSerializer.Deserialize<ChatMemberDto>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var member = JsonSerializer.Deserialize<ChatMemberDto>(responseContent, JsonOptions);
         
         Assert.NotNull(member);
         Assert.Equal("Test User", member.Name);
@@ -173,10 +175,7 @@ public class MembersApiIntegrationTests : IClassFixture<WebApplicationFactory<Pr
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var responseContent = await response.Content.ReadAsStringAsync();
-        var member = JsonSerializer.Deserialize<ChatMemberDto>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var member = JsonSerializer.Deserialize<ChatMemberDto>(responseContent, JsonOptions);
         
         Assert.NotNull(member);
         Assert.Equal(expectedMember.Id, member.Id);

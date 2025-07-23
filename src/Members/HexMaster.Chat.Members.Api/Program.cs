@@ -55,4 +55,7 @@ app.MapPut("/members/{id}/activity", async (string id, IMemberService memberServ
 await app.RunAsync();
 
 // Make the Program class accessible for integration tests
-public partial class Program { }
+public partial class Program
+{
+    protected Program() { } // Protected constructor to allow access in integration tests
+}

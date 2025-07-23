@@ -10,10 +10,11 @@
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/nikneem/aspire-dapr-chat-service-demo)
 ![GitHub License](https://img.shields.io/github/license/nikneem/aspire-dapr-chat-service-demo)
-<!-- [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo) -->
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=bugs)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo)
+
+<!-- [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nikneem_aspire-dapr-chat-service-demo&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nikneem_aspire-dapr-chat-service-demo) -->
 
 <a href="#architecture" style="text-decoration: none">Architecture</a> |
 <a href="#technology" style="text-decoration: none">Technology</a> |

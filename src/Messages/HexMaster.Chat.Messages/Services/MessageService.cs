@@ -30,6 +30,12 @@ public class MessageService : IMessageService
 
     public async Task<ChatMessageDto> SendMessageAsync(SendMessageRequest request)
     {
+        // Validate sender ID
+        if (string.IsNullOrWhiteSpace(request.SenderId))
+        {
+            throw new ArgumentException("Sender ID cannot be empty");
+        }
+
         // Validate message content
         if (string.IsNullOrWhiteSpace(request.Content))
         {
@@ -83,10 +89,18 @@ public class MessageService : IMessageService
             SentAt = now
         };
 
-        await _daprClient.PublishEventAsync(
-            DaprComponents.PubSubName,
-            Topics.MessageSent,
-            messageSentEvent);
+        try
+        {
+            await _daprClient.PublishEventAsync(
+                DaprComponents.PubSubName,
+                Topics.MessageSent,
+                messageSentEvent);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish message sent event for message {MessageId}", messageId);
+            // Continue execution - message is already stored
+        }
 
         _logger.LogInformation("Message {MessageId} sent by {SenderId}", messageId, request.SenderId);
 
@@ -103,12 +117,22 @@ public class MessageService : IMessageService
 
     public async Task<IEnumerable<ChatMessageDto>> GetRecentMessagesAsync(int count = 50)
     {
+        if (count <= 0)
+        {
+            throw new ArgumentException("Count must be greater than zero");
+        }
+
         var messageEntities = await _repository.GetRecentMessagesAsync(count);
         return messageEntities.Select(MapToDto);
     }
 
     public async Task<IEnumerable<ChatMessageDto>> GetMessageHistoryAsync(DateTime from, DateTime to)
     {
+        if (from > to)
+        {
+            throw new ArgumentException("From date cannot be greater than to date");
+        }
+
         var messageEntities = await _repository.GetMessagesByDateRangeAsync(from, to);
         return messageEntities.Select(MapToDto);
     }

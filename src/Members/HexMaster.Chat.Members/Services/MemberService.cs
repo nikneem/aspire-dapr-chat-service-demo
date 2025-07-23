@@ -26,6 +26,12 @@ public class MemberService : IMemberService
 
     public async Task<ChatMemberDto> RegisterMemberAsync(RegisterMemberRequest request)
     {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+        
+        if (string.IsNullOrWhiteSpace(request.Name))
+            throw new ArgumentException("Member name cannot be null or empty.", nameof(request.Name));
+
         var memberId = Guid.NewGuid().ToString();
         var now = DateTime.UtcNow;
 
@@ -41,17 +47,25 @@ public class MemberService : IMemberService
         await _repository.CreateAsync(memberEntity);
 
         // Publish member joined event
-        var memberJoinedEvent = new MemberJoinedEvent
+        try
         {
-            Id = memberId,
-            Name = request.Name,
-            JoinedAt = now
-        };
+            var memberJoinedEvent = new MemberJoinedEvent
+            {
+                Id = memberId,
+                Name = request.Name,
+                JoinedAt = now
+            };
 
-        await _daprClient.PublishEventAsync(
-            DaprComponents.PubSubName,
-            Topics.MemberJoined,
-            memberJoinedEvent);
+            await _daprClient.PublishEventAsync(
+                DaprComponents.PubSubName,
+                Topics.MemberJoined,
+                memberJoinedEvent);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish member joined event for {MemberId}", memberId);
+            // Continue - event publishing failure should not fail the registration
+        }
 
         _logger.LogInformation("Member {MemberId} registered: {MemberName}", memberId, request.Name);
 
@@ -67,6 +81,9 @@ public class MemberService : IMemberService
 
     public async Task<ChatMemberDto?> GetMemberAsync(string id)
     {
+        if (string.IsNullOrWhiteSpace(id))
+            return null;
+
         var memberEntity = await _repository.GetByIdAsync(id);
         if (memberEntity == null)
             return null;
@@ -83,12 +100,18 @@ public class MemberService : IMemberService
 
     public async Task UpdateLastActivityAsync(string id)
     {
+        if (string.IsNullOrWhiteSpace(id))
+            throw new ArgumentException("Member ID cannot be null or empty.", nameof(id));
+
         var memberEntity = await _repository.GetByIdAsync(id);
-        if (memberEntity != null)
+        if (memberEntity == null)
         {
-            var updatedEntity = memberEntity with { LastActivityAt = DateTime.UtcNow };
-            await _repository.UpdateAsync(updatedEntity);
+            // Member not found, nothing to update
+            return;
         }
+
+        var updatedEntity = memberEntity with { LastActivityAt = DateTime.UtcNow };
+        await _repository.UpdateAsync(updatedEntity);
     }
 
     public async Task RemoveInactiveMembersAsync()
@@ -98,22 +121,30 @@ public class MemberService : IMemberService
 
         foreach (var member in inactiveMembers)
         {
-            // Publish member left event
-            var memberLeftEvent = new MemberLeftEvent
+            try
             {
-                Id = member.RowKey,
-                Name = member.Name,
-                LeftAt = DateTime.UtcNow
-            };
+                // Publish member left event
+                var memberLeftEvent = new MemberLeftEvent
+                {
+                    Id = member.RowKey,
+                    Name = member.Name,
+                    LeftAt = DateTime.UtcNow
+                };
 
-            await _daprClient.PublishEventAsync(
-                DaprComponents.PubSubName,
-                Topics.MemberLeft,
-                memberLeftEvent);
+                await _daprClient.PublishEventAsync(
+                    DaprComponents.PubSubName,
+                    Topics.MemberLeft,
+                    memberLeftEvent);
 
-            await _repository.DeleteAsync(member.RowKey);
+                await _repository.DeleteAsync(member.RowKey);
 
-            _logger.LogInformation("Removed inactive member {MemberId}: {MemberName}", member.RowKey, member.Name);
+                _logger.LogInformation("Removed inactive member {MemberId}: {MemberName}", member.RowKey, member.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to remove inactive member {MemberId}: {MemberName}", member.RowKey, member.Name);
+                // Continue with other members
+            }
         }
     }
 }

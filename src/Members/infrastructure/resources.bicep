@@ -43,14 +43,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.applicationInsightsName
 }
-module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
-  scope: resourceGroup(applicationLandingZone.resourceGroupName)
-  name: '${serviceName}-sb-topics'
-  params: {
-    landingzoneEnvironment: applicationLandingZone
-    topics: serviceBusTopics
-  }
-}
+
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: uniqueString(defaultResourceName)
@@ -199,6 +192,15 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         ]
       }
     }
+  }
+}
+
+module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
+  scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: '${serviceName}-sb-topics'
+  params: {
+    landingzoneEnvironment: applicationLandingZone
+    topics: serviceBusTopics
   }
 }
 

@@ -331,4 +331,254 @@ public class MessageServiceTests
         // Assert
         _mockRepository.Verify(x => x.DeleteBatchAsync(It.IsAny<IEnumerable<string>>()), Times.Never);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    [InlineData("\n")]
+    public async Task SendMessageAsync_WithInvalidContent_ShouldThrowArgumentException(string invalidContent)
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = invalidContent,
+            SenderId = "sender-123"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.SendMessageAsync(request));
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_WithNullContent_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = null!,
+            SenderId = "sender-123"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.SendMessageAsync(request));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    [InlineData("\n")]
+    public async Task SendMessageAsync_WithInvalidSenderId_ShouldThrowArgumentException(string invalidSenderId)
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = "Hello, world!",
+            SenderId = invalidSenderId
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.SendMessageAsync(request));
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_WithNullSenderId_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = "Hello, world!",
+            SenderId = null!
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.SendMessageAsync(request));
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_MemberNotFound_ShouldUseFallbackName()
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = "Hello, world!",
+            SenderId = "non-existent-sender"
+        };
+
+        _mockMemberStateService
+            .Setup(x => x.GetMemberNameAsync("non-existent-sender"))
+            .ReturnsAsync((string?)null);
+
+        _mockRepository
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ReturnsAsync((MessageEntityDto entity) => entity);
+
+        _mockDaprClient
+            .Setup(x => x.PublishEventAsync(
+                DaprComponents.PubSubName,
+                Topics.MessageSent,
+                It.IsAny<MessageSentEvent>(),
+                default))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _service.SendMessageAsync(request);
+
+        // Assert
+        Assert.StartsWith("User_non-exi", result.SenderName);
+        
+        // Verify warning was logged
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("not found in state store")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_RepositoryThrowsException_ShouldPropagateException()
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = "Hello, world!",
+            SenderId = "sender-123"
+        };
+
+        _mockMemberStateService
+            .Setup(x => x.GetMemberNameAsync("sender-123"))
+            .ReturnsAsync("Test User");
+
+        _mockRepository
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.SendMessageAsync(request));
+    }
+
+    [Fact]
+    public async Task SendMessageAsync_DaprClientThrowsException_ShouldStillReturnMessage()
+    {
+        // Arrange
+        var request = new SendMessageRequest
+        {
+            Content = "Hello, world!",
+            SenderId = "sender-123"
+        };
+
+        _mockMemberStateService
+            .Setup(x => x.GetMemberNameAsync("sender-123"))
+            .ReturnsAsync("Test User");
+
+        _mockRepository
+            .Setup(x => x.CreateAsync(It.IsAny<MessageEntityDto>()))
+            .ReturnsAsync((MessageEntityDto entity) => entity);
+
+        _mockDaprClient
+            .Setup(x => x.PublishEventAsync(
+                DaprComponents.PubSubName,
+                Topics.MessageSent,
+                It.IsAny<MessageSentEvent>(),
+                default))
+            .ThrowsAsync(new InvalidOperationException("Dapr error"));
+
+        // Act
+        var result = await _service.SendMessageAsync(request);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Hello, world!", result.Content);
+        Assert.Equal("sender-123", result.SenderId);
+        Assert.Equal("Test User", result.SenderName);
+    }
+
+    [Fact]
+    public async Task GetRecentMessagesAsync_WithNegativeCount_ShouldThrowArgumentException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.GetRecentMessagesAsync(-1));
+    }
+
+    [Fact]
+    public async Task GetRecentMessagesAsync_WithZeroCount_ShouldThrowArgumentException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.GetRecentMessagesAsync(0));
+    }
+
+    [Fact]
+    public async Task GetRecentMessagesAsync_RepositoryThrowsException_ShouldPropagateException()
+    {
+        // Arrange
+        _mockRepository
+            .Setup(x => x.GetRecentMessagesAsync(50))
+            .ThrowsAsync(new InvalidOperationException("Query failed"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.GetRecentMessagesAsync(50));
+    }
+
+    [Fact]
+    public async Task GetMessageHistoryAsync_WithInvalidDateRange_ShouldThrowArgumentException()
+    {
+        // Arrange
+        var from = DateTime.UtcNow;
+        var to = DateTime.UtcNow.AddHours(-1); // to is before from
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.GetMessageHistoryAsync(from, to));
+    }
+
+    [Fact]
+    public async Task GetMessageHistoryAsync_RepositoryThrowsException_ShouldPropagateException()
+    {
+        // Arrange
+        var from = DateTime.UtcNow.AddHours(-2);
+        var to = DateTime.UtcNow.AddHours(-1);
+
+        _mockRepository
+            .Setup(x => x.GetMessagesByDateRangeAsync(from, to))
+            .ThrowsAsync(new InvalidOperationException("Query failed"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.GetMessageHistoryAsync(from, to));
+    }
+
+    [Fact]
+    public async Task RemoveExpiredMessagesAsync_RepositoryThrowsException_ShouldPropagateException()
+    {
+        // Arrange
+        _mockRepository
+            .Setup(x => x.GetExpiredMessagesAsync(It.IsAny<DateTime>()))
+            .ThrowsAsync(new InvalidOperationException("Query failed"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RemoveExpiredMessagesAsync());
+    }
+
+    [Fact]
+    public async Task RemoveExpiredMessagesAsync_DeleteBatchThrowsException_ShouldPropagateException()
+    {
+        // Arrange
+        var expiredMessages = new List<MessageEntityDto>
+        {
+            new() { RowKey = "msg1", Content = "Old message 1", SenderId = "user1", SenderName = "User 1", SentAt = DateTime.UtcNow.AddDays(-8) }
+        };
+
+        _mockRepository
+            .Setup(x => x.GetExpiredMessagesAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(expiredMessages);
+
+        _mockRepository
+            .Setup(x => x.DeleteBatchAsync(It.IsAny<IEnumerable<string>>()))
+            .ThrowsAsync(new InvalidOperationException("Delete failed"));
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RemoveExpiredMessagesAsync());
+    }
 }

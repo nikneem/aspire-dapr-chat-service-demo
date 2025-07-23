@@ -74,3 +74,6 @@ app.MapGet("/messages/history", async (
 });
 
 await app.RunAsync();
+
+// Make the Program class accessible for integration tests
+public partial class Program { }

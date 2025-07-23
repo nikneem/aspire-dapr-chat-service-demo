@@ -7,8 +7,8 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2023-01-01-preview' existin
 
 resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/topics@2024-01-01' = [
   for queue in topics: {
-    name: queue.name
     parent: serviceBus
+    name: queue.name
     properties: {
       defaultMessageTimeToLive: 'P7D'
       enablePartitioning: false

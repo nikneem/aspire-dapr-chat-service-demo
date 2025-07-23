@@ -12,8 +12,8 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-08-02-
 }
 
 resource daprComponent 'Microsoft.App/managedEnvironments/daprComponents@2024-03-01' = {
-  name: daprComponentName
   parent: containerAppsEnvironment
+  name: daprComponentName
   properties: {
     componentType: daprComponentType
     version: daprComponentVersion

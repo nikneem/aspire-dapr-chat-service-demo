@@ -46,8 +46,8 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
   location: location
-  tags: tags
   kind: 'web'
+  tags: tags
   properties: {
     Application_Type: 'web'
     WorkspaceResourceId: logAnalyticsWorkspace.id
@@ -61,11 +61,11 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
   location: location
-  tags: tags
   sku: {
     name: 'Standard'
     tier: 'Standard'
   }
+  tags: tags
   properties: {
     minimumTlsVersion: '1.2'
     publicNetworkAccess: 'Enabled'
@@ -171,14 +171,11 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2023-03-01' = {
   name: appConfigName
   location: location
-  tags: tags
   sku: {
     name: 'free'
   }
+  tags: tags
   properties: {
-    encryption: {
-      keyVaultProperties: null
-    }
     disableLocalAuth: false
     enablePurgeProtection: false
     publicNetworkAccess: 'Enabled'

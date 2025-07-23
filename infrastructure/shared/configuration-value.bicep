@@ -7,8 +7,8 @@ resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2023-0
 }
 
 resource configurationValue 'Microsoft.AppConfiguration/configurationStores/keyValues@2023-03-01' = {
-  name: settingName
   parent: appConfiguration
+  name: settingName
   properties: {
     contentType: 'text/plain'
     value: settingValue

@@ -19,6 +19,8 @@ param containerRegistryServer string
 @description('Tags to apply to all resources')
 param tags object = {}
 
+param containerPort int = 8080
+
 var serviceBusTopics = [
   {
     name: 'message-sent'
@@ -26,7 +28,6 @@ var serviceBusTopics = [
 ]
 
 
-param containerPort int = 8080
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
@@ -62,6 +63,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   properties: {
     supportsHttpsTrafficOnly: true
     isHnsEnabled: true
+    minimumTlsVersion: 'TLS1_2'
   }
   resource tableService 'tableServices' = {
     name: 'default'

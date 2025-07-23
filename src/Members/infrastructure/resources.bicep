@@ -29,6 +29,7 @@ var serviceBusTopics = [
     name: 'member-left'
   }
 ]
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
@@ -51,8 +52,6 @@ module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.
   }
 }
 
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-members-api:${containerImageTag}'
-
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: uniqueString(defaultResourceName)
   location: location
@@ -64,6 +63,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   properties: {
     supportsHttpsTrafficOnly: true
     isHnsEnabled: true
+    minimumTlsVersion:'TLS1_2'
   }
   resource tableService 'tableServices' = {
     name: 'default'

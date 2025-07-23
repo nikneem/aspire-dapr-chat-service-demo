@@ -21,21 +21,20 @@ param tags object = {}
 
 param containerPort int = 3000
 
+var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-client:${containerImageTag}'
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
   name: applicationLandingZone.containerAppsEnvironmentName
 }
 
-var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-client:${containerImageTag}'
-
-// ChatClient Container App
 resource clientContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-app'
   location: location
-  tags: tags
   identity: {
     type: 'SystemAssigned'
   } 
+  tags: tags
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {

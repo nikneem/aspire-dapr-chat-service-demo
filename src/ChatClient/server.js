@@ -34,7 +34,7 @@ app.get('/api/config', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    const config = configLoader.getConfig();
+    configLoader.getConfig();
     res.json({ 
         status: 'healthy', 
         timestamp: new Date().toISOString(),

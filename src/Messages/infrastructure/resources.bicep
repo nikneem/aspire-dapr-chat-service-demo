@@ -41,8 +41,8 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing
   name: applicationLandingZone.applicationInsightsName
 }
 module serviceBusTopicsModule '../../../infrastructure/shared/servicebus-topics.bicep' = {
-  name: '${serviceName}-sb-topics'
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: '${serviceName}-sb-topics'
   params: {
     landingzoneEnvironment: applicationLandingZone
     topics: serviceBusTopics
@@ -54,11 +54,11 @@ var containerImageName = '${containerRegistryServer}/cekeilholz/aspirichat-messa
 resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: uniqueString(defaultResourceName)
   location: location
-  tags: tags
   sku: {
     name: 'Standard_LRS'
   }
   kind: 'StorageV2'
+  tags: tags
   properties: {
     supportsHttpsTrafficOnly: true
     isHnsEnabled: true
@@ -75,10 +75,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
 resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${defaultResourceName}-app'
   location: location
-  tags: tags
   identity: {
     type: 'SystemAssigned'
   } 
+  tags: tags
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
@@ -201,8 +201,8 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 module appConfigRoleAssignment '../../../infrastructure/shared/role-assignment-app-configuration.bicep' = {
-  name: '${defaultResourceName}-appcfg-module'
   scope: resourceGroup(applicationLandingZone.resourceGroupName)
+  name: '${defaultResourceName}-appcfg-module'
   params: {
     containerAppPrincipalId: apiContainerApp.identity.principalId
     systemName: serviceName

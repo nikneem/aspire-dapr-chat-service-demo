@@ -113,6 +113,17 @@ resource clientContainerApp 'Microsoft.App/containerApps@2025-02-02-preview' = {
   }
 }
 
+module managedCertificate '../../../infrastructure/shared/container-apps-managed-cert.bicep' = {
+  scope : resourceGroup(applicationLandingZone.resourceGroupName)
+  name: 'chatClientManagedCertificate'
+  params: {
+    certificateName: 'chat-hexmaster-nl'
+    location: location
+    containerAppManegedEnvironmentName: applicationLandingZone.containerAppsEnvironmentName
+    domainName: 'chat.hexmaster.nl'
+  }
+}
+
 output containerAppName string = clientContainerApp.name
 output containerAppUrl string = 'https://${clientContainerApp.properties.configuration.ingress.fqdn}'
 output containerAppFqdn string = clientContainerApp.properties.configuration.ingress.fqdn

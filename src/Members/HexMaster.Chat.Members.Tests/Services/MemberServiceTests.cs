@@ -256,7 +256,7 @@ public class MemberServiceTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.RegisterMemberAsync(request));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _service.RegisterMemberAsync(request));
     }
 
     [Fact]

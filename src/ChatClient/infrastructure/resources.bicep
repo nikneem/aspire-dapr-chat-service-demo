@@ -49,6 +49,7 @@ resource clientContainerApp 'Microsoft.App/containerApps@2025-02-02-preview' = {
         external: true
         targetPort: containerPort
         allowInsecure: false
+        clientCertificateMode: 'accept'
         traffic: [
           {
             weight: 100

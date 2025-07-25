@@ -92,6 +92,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         external: true
         targetPort: containerPort
         allowInsecure: false
+        clientCertificateMode: 'accept'
         traffic: [
           {
             weight: 100

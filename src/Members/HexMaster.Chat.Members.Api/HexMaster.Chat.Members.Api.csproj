@@ -8,6 +8,8 @@
     <ContainerRepository>cekeilholz/aspirichat-members-api</ContainerRepository>
     <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:9.0</ContainerBaseImage>
     <ContainerUser>app</ContainerUser>
+    <PublishAot>True</PublishAot>
+    <PublishTrimmed>True</PublishTrimmed>
   </PropertyGroup>
 
   <ItemGroup>

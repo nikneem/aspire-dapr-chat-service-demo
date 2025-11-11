@@ -25,7 +25,7 @@ on:
 
 env:
   AZURE_LOCATION: "North Europe"
-  DOTNET_VERSION: "9.0.x"
+  DOTNET_VERSION: "10.0.x"
   API_PROJECT_PATH: "src/Messages/HexMaster.Chat.Messages.Api"
   TESTS_PROJECT_PATH: "src/Messages/HexMaster.Chat.Messages.Tests"
   INFRASTRUCTURE_PATH: "src/Messages/infrastructure"

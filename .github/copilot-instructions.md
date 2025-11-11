@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a distributed chat application backend built with **.NET 9** and **C# 13**. The application consists of multiple microservices orchestrated with .NET Aspire and uses Dapr for event-driven communication. This document establishes clear boundaries and guidelines for AI-assisted development.
+This is a distributed chat application backend built with **.NET 10** and **C# 13**. The application consists of multiple microservices orchestrated with .NET Aspire and uses Dapr for event-driven communication. This document establishes clear boundaries and guidelines for AI-assisted development.
 
 ## AI Automation Boundaries
 
@@ -47,7 +47,7 @@ This is a distributed chat application backend built with **.NET 9** and **C# 13
 
 ## Technology Stack
 
-- **.NET 9**: All .NET projects must target .NET 9
+- **.NET 10**: All .NET projects must target .NET 10
 - **C# 13**: Use latest C# 13 language features and constructs
 - **ASP.NET Core Web APIs**: RESTful service endpoints
 - **Node.js >= 20.12 & Express.js**: Chat client web server

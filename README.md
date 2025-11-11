@@ -29,7 +29,7 @@
 
 # Aspire Dapr Chat Service Demo
 
-A distributed chat application backend built with .NET 9, ASP.NET Core, .NET Aspire, and Dapr. This demonstration showcases event-driven microservices architecture with real-time messaging capabilities. All orchestrated locally with .NET Aspire and in the cloud with Azure Container Apps (expected soon).
+A distributed chat application backend built with .NET 10, ASP.NET Core, .NET Aspire, and Dapr. This demonstration showcases event-driven microservices architecture with real-time messaging capabilities. All orchestrated locally with .NET Aspire and in the cloud with Azure Container Apps (expected soon).
 
 ![alt text](docs/screendump.png)
 
@@ -46,7 +46,7 @@ All services are orchestrated using .NET Aspire and communicate through Dapr pub
 
 ## Technology
 
-- **.NET 9**: Latest .NET version for all projects
+- **.NET 10**: Latest .NET version for all projects
 - **ASP.NET Core Web APIs**: RESTful service endpoints
 - **Node.js & Express**: Chat client web server
 - **Azure Table Storage**: Data persistence (using Azurite emulator for local development)
@@ -59,7 +59,7 @@ All services are orchestrated using .NET Aspire and communicate through Dapr pub
 
 Before running the application, ensure you have the following installed:
 
-2. **.NET 9 SDK**: Download from [https://dotnet.microsoft.com/download/dotnet/9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
+2. **.NET 10 SDK**: Download from [https://dotnet.microsoft.com/download/dotnet/10.0](https://dotnet.microsoft.com/download/dotnet/10.0)
 3. **Node.js** (v20 or later): Download from [https://nodejs.org/](https://nodejs.org/)
 4. **Docker Desktop**: Required for Redis and Azurite containers
 5. **Dapr CLI**: Install from [https://docs.dapr.io/getting-started/install-dapr-cli/](https://docs.dapr.io/getting-started/install-dapr-cli/)

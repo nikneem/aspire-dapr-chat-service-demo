@@ -3,6 +3,9 @@ kind: Component
 metadata:
   name: chatservice-pubsub
 spec:
+  # ======================================================================
+  # OPTION 1: Redis Pub/Sub (Currently Active)
+  # ======================================================================
   type: pubsub.redis
   version: v1
   metadata:
@@ -10,3 +13,23 @@ spec:
       value: localhost:6379
     - name: redisPassword
       value: ""
+
+  # ======================================================================
+  # OPTION 2: RabbitMQ Pub/Sub (Commented Out)
+  # ======================================================================
+  # Uncomment the lines below and comment out the Redis configuration above
+  # type: pubsub.rabbitmq
+  # version: v1
+  # metadata:
+  #   - name: host
+  #     value: amqp://localhost:5672
+  #   - name: durable
+  #     value: "false"
+  #   - name: deletedWhenUnused
+  #     value: "false"
+  #   - name: autoAck
+  #     value: "false"
+  #   - name: deliveryMode
+  #     value: "0"
+  #   - name: requeueInFailure
+  #     value: "false"

@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.11.0" />
-    <PackageReference Include="Aspire.Azure.Data.Tables" Version="13.0.0" />
+    <PackageReference Include="Aspire.Azure.Data.Tables" Version="13.1.1" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.16.1" />
   </ItemGroup>
 

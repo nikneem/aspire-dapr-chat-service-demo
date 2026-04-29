@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This document outlines the functional requirements for a distributed chat application backend built with .NET 9, ASP.NET Core, .NET Aspire, and Dapr. The system enables real-time messaging between multiple users through a microservices architecture with event-driven communication.
+This document outlines the functional requirements for a distributed chat application backend built with .NET 10, ASP.NET Core, .NET Aspire, and Dapr. The system enables real-time messaging between multiple users through a microservices architecture with event-driven communication.
 
 ## System Architecture
 

@@ -1,3 +1,6 @@
+# ======================================================================
+# This is 'the old way' of configureing DAPR components locally
+# ======================================================================
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:

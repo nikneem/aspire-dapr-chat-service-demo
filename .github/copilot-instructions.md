@@ -1,24 +1,58 @@
-# Chat Application Backend - Copilot Instructions
+# Chat Application Backend - Copilot AI Automation Instructions
 
 ## Project Overview
 
-This is a distributed chat application backend built with .NET 9 and C#. The application consists of multiple microservices orchestrated with .NET Aspire and uses Dapr for event-driven communication.
+This is a distributed chat application backend built with **.NET 10** and **C# 13**. The application consists of multiple microservices orchestrated with .NET Aspire and uses Dapr for event-driven communication. This document establishes clear boundaries and guidelines for AI-assisted development.
+
+## AI Automation Boundaries
+
+### ✅ AI IS ENCOURAGED TO:
+
+- Implement new features following established architectural patterns
+- Fix bugs and optimize existing code
+- Add comprehensive unit and integration tests
+- Improve error handling and logging
+- Generate documentation and code comments
+- Refactor code for better maintainability
+- Add validation and security improvements
+- Optimize performance and resource usage
+- Use the **microsoft.docs.mcp MCP server** for official Microsoft documentation references
+
+### ⚠️ AI MUST ASK PERMISSION BEFORE:
+
+- Making breaking changes to public APIs or contracts
+- Modifying database schemas or storage structures
+- Changing Dapr component configurations
+- Altering Aspire service orchestration setup
+- Modifying infrastructure or deployment configurations
+- Adding new external dependencies or NuGet packages
+- Changing authentication or authorization mechanisms
+
+### ❌ AI SHOULD NEVER:
+
+- Delete or significantly modify existing data entities
+- Remove established security measures
+- Make changes that could cause data loss
+- Modify production configuration files without explicit instruction
+- Change fundamental architectural decisions
+- Remove existing tests without replacement
 
 ## Architecture
 
 - **Members API**: Manages chat members and user registration
 - **Messages API**: Handles message sending and storage
 - **Realtime API**: Broadcasts messages to clients via SignalR
-- **Chat Client**: Node.js-based web client serving the chat interface
+- **Chat Client**: Node.js Express server serving the chat interface
 - **Aspire AppHost**: Orchestrates all services and dependencies
 
 ## Technology Stack
 
-- **.NET 9**: Latest .NET version for all projects
+- **.NET 10**: All .NET projects must target .NET 10
+- **C# 13**: Use latest C# 13 language features and constructs
 - **ASP.NET Core Web APIs**: RESTful service endpoints
-- **Node.js & Express**: Chat client web server
+- **Node.js >= 20.12 & Express.js**: Chat client web server
 - **Azure Table Storage**: Data persistence for members and messages
-- **Dapr**: Event-driven pub/sub messaging
+- **Dapr**: Event-driven pub/sub messaging and state management
 - **Redis**: Dapr state store and pub/sub backend
 - **SignalR**: Real-time client communication
 - **.NET Aspire**: Service orchestration and observability
@@ -33,6 +67,7 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Publish member events via Dapr pub/sub
 - **Abstractions project** (`HexMaster.Chat.Members.Abstractions`): Contains interfaces, DTOs, events, and request models
 - **Implementation project** (`HexMaster.Chat.Members`): Contains concrete implementations, entities, and dependency injection setup
+- **Tests project** (`HexMaster.Chat.Members.Tests`): Comprehensive unit and integration tests
 
 ### Messages API (`HexMaster.Chat.Messages.Api`)
 
@@ -42,6 +77,7 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Handle message history retrieval
 - **Abstractions project** (`HexMaster.Chat.Messages.Abstractions`): Contains interfaces, DTOs, events, and request models
 - **Implementation project** (`HexMaster.Chat.Messages`): Contains concrete implementations, entities, controllers, and dependency injection setup
+- **Tests project** (`HexMaster.Chat.Messages.Tests`): Comprehensive unit and integration tests
 
 ### Realtime API (`HexMaster.Chat.Realtime.Api`)
 
@@ -49,91 +85,121 @@ This is a distributed chat application backend built with .NET 9 and C#. The app
 - Broadcast messages to connected clients via SignalR
 - Manage SignalR connections and groups
 - Handle real-time notifications
+- **Tests project** (`HexMaster.Chat.Realtime.Tests`): SignalR hub and real-time communication tests
 
 ### Chat Client (`src/ChatClient`)
 
-- Serves the chat application UI via Express.js server
-- Provides configuration endpoint exposing Aspire service URLs
+- **Node.js >= 20.12** Express.js server serving the chat interface
+- Provides configuration endpoint exposing Aspire service URLs via `/api/config`
 - Handles static file serving for the web interface
 - Integrates with .NET Aspire orchestration via AddNpmApp
+- Uses configuration loader for environment-specific settings
+- Health check endpoint at `/health`
+
+### Shared Components (`HexMaster.Chat.Shared`)
+
+- Common models, constants, and utilities shared across all services
+- Dapr event models and shared DTOs
+- Application-wide constants and configuration models
+
+### Aspire Configuration
+
+- **AppHost** (`HexMaster.Chat.Aspire.AppHost`): Central orchestration and service configuration
+- **ServiceDefaults** (`HexMaster.Chat.Aspire.ServiceDefaults`): Common service extensions and configurations
 
 ## Project Structure
 
 ```
 src/
+├── .gitignore                                   # Git ignore rules
+├── .vs/                                         # Visual Studio files
+├── Aspire Chat.sln                              # Solution file
+├── AspireConstants.cs                           # Service name constants
 ├── Aspire/
-│   ├── HexMaster.Chat.Aspire.AppHost/          # Aspire orchestration
-│   │   ├── Program.cs                          # Service configuration
-│   │   ├── appsettings.json                    # Environment settings
-│   │   └── HexMaster.Chat.Aspire.AppHost.csproj
-│   └── HexMaster.Chat.Aspire.ServiceDefaults/  # Shared configuration
-│       ├── Extensions.cs                       # Common service extensions
-│       └── HexMaster.Chat.Aspire.ServiceDefaults.csproj
-├── ChatClient/                                  # Node.js web client
-│   ├── public/
-│   │   └── index.html                          # Chat interface
-│   ├── server.js                               # Express.js server
-│   ├── package.json                            # Node.js dependencies
-│   ├── Dockerfile                              # Container configuration
-│   └── README.md                               # Client documentation
+│   └── HexMaster.Chat.Aspire/
+│       ├── HexMaster.Chat.Aspire.AppHost/       # Aspire orchestration
+│       │   ├── Program.cs                       # Service configuration
+│       │   ├── appsettings.json                 # Environment settings
+│       │   └── HexMaster.Chat.Aspire.AppHost.csproj
+│       └── HexMaster.Chat.Aspire.ServiceDefaults/ # Shared configuration
+│           ├── Extensions.cs                    # Common service extensions
+│           └── HexMaster.Chat.Aspire.ServiceDefaults.csproj
+├── ChatClient/                                  # Node.js Express web server
+│   ├── build-prod.bat                           # Windows production build
+│   ├── build-prod.js                            # Production build script
+│   ├── build-prod.sh                            # Unix production build
+│   ├── config-loader.js                         # Configuration management
+│   ├── CONFIG.md                                # Configuration documentation
+│   ├── Dockerfile                               # Container configuration
+│   ├── nginx.conf.template                      # Nginx configuration template
+│   ├── package.json                             # Node.js dependencies (>=20.12)
+│   ├── README.md                                # Client documentation
+│   ├── server.js                                # Express.js server entry point
+│   ├── test-config.js                           # Configuration testing
+│   ├── config/                                  # Environment configurations
+│   ├── infrastructure/                          # Deployment configurations
+│   └── public/                                  # Static web files
 ├── Members/
-│   ├── HexMaster.Chat.Members.Abstractions/    # Member service contracts
-│   │   ├── DTOs/                               # Data transfer objects
-│   │   ├── Events/                             # Member-specific events
-│   │   ├── Interfaces/                         # Service and repository interfaces
-│   │   └── Requests/                           # Member-specific request models
-│   ├── HexMaster.Chat.Members/                 # Member service implementation
+│   ├── HexMaster.Chat.Members.Abstractions/     # Member service contracts
+│   │   ├── DTOs/                                # Data transfer objects
+│   │   ├── Events/                              # Member-specific events
+│   │   ├── Interfaces/                          # Service and repository interfaces
+│   │   └── Requests/                            # Member-specific request models
+│   ├── HexMaster.Chat.Members/                  # Member service implementation
 │   │   ├── Entities/
-│   │   │   └── MemberEntity.cs                 # Member data model
+│   │   │   └── MemberEntity.cs                  # Member data model
 │   │   ├── Repositories/
-│   │   │   └── MemberRepository.cs             # Data access implementation
+│   │   │   └── MemberRepository.cs              # Data access implementation
 │   │   ├── Services/
-│   │   │   └── MemberService.cs                # Business logic implementation
+│   │   │   └── MemberService.cs                 # Business logic implementation
 │   │   ├── BackgroundServices/
-│   │   │   └── MemberCleanupService.cs         # Inactive member cleanup
+│   │   │   └── MemberCleanupService.cs          # Inactive member cleanup
 │   │   └── Extensions/
-│   │       └── ServiceCollectionExtensions.cs  # Dependency injection setup
-│   ├── HexMaster.Chat.Members.Api/             # Member API host
-│   │   ├── Program.cs                          # Service configuration
-│   │   └── appsettings.json                    # API-specific settings
-│   └── HexMaster.Chat.Members.Tests/           # Member service tests
+│   │       └── ServiceCollectionExtensions.cs   # Dependency injection setup
+│   ├── HexMaster.Chat.Members.Api/              # Member API host
+│   │   ├── Program.cs                           # Service configuration
+│   │   └── appsettings.json                     # API-specific settings
+│   ├── HexMaster.Chat.Members.Tests/            # Member service tests
+│   └── infrastructure/                          # Member service infrastructure
 ├── Messages/
-│   ├── HexMaster.Chat.Messages.Abstractions/   # Message service contracts
-│   │   ├── DTOs/                               # Data transfer objects
-│   │   ├── Events/                             # Message-specific events
-│   │   ├── Interfaces/                         # Service and repository interfaces
-│   │   └── Requests/                           # Message-specific request models
-│   ├── HexMaster.Chat.Messages/                # Message service implementation
+│   ├── HexMaster.Chat.Messages.Abstractions/    # Message service contracts
+│   │   ├── DTOs/                                # Data transfer objects
+│   │   ├── Events/                              # Message-specific events
+│   │   ├── Interfaces/                          # Service and repository interfaces
+│   │   └── Requests/                            # Message-specific request models
+│   ├── HexMaster.Chat.Messages/                 # Message service implementation
 │   │   ├── Entities/
-│   │   │   └── MessageEntity.cs                # Message data model
+│   │   │   └── MessageEntity.cs                 # Message data model
 │   │   ├── Repositories/
-│   │   │   └── MessageRepository.cs            # Data access implementation
+│   │   │   └── MessageRepository.cs             # Data access implementation
 │   │   ├── Services/
-│   │   │   ├── MessageService.cs               # Business logic implementation
-│   │   │   └── MemberStateService.cs           # Member state management
+│   │   │   ├── MessageService.cs                # Business logic implementation
+│   │   │   └── MemberStateService.cs            # Member state management
 │   │   ├── BackgroundServices/
-│   │   │   └── MessageCleanupService.cs        # Message retention
-│   │   ├── Controllers/                        # Dapr event controllers
+│   │   │   └── MessageCleanupService.cs         # Message retention
+│   │   ├── Controllers/                         # Dapr event controllers
 │   │   └── Extensions/
-│   │       └── ServiceCollectionExtensions.cs  # Dependency injection setup
-│   ├── HexMaster.Chat.Messages.Api/            # Message API host
-│   │   ├── Program.cs                          # Service configuration
-│   │   └── appsettings.json                    # API-specific settings
-│   └── HexMaster.Chat.Messages.Tests/          # Message service tests
+│   │       └── ServiceCollectionExtensions.cs   # Dependency injection setup
+│   ├── HexMaster.Chat.Messages.Api/             # Message API host
+│   │   ├── Program.cs                           # Service configuration
+│   │   └── appsettings.json                     # API-specific settings
+│   ├── HexMaster.Chat.Messages.Tests/           # Message service tests
+│   └── infrastructure/                          # Message service infrastructure
 ├── Realtime/
-│   └── HexMaster.Chat.Realtime.Api/            # SignalR service
-│       ├── Controllers/                        # Dapr event controllers
-│       ├── Hubs/
-│       │   └── ChatHub.cs                      # SignalR hub
-│       └── Program.cs                          # Service configuration
+│   ├── HexMaster.Chat.Realtime.Api/             # SignalR service
+│   │   ├── Controllers/                         # Dapr event controllers
+│   │   ├── Hubs/
+│   │   │   └── ChatHub.cs                       # SignalR hub
+│   │   └── Program.cs                           # Service configuration
+│   ├── HexMaster.Chat.Realtime.Tests/           # Realtime service tests
+│   └── infrastructure/                          # Realtime service infrastructure
 ├── Shared/
-│   └── HexMaster.Chat.Shared/                  # Common models and utilities
-│       ├── Constants/                          # Application constants
-│       ├── Events/                             # Dapr event models
-│       ├── Models/                             # Shared DTOs
-│       └── Requests/                           # API request models
-├── AspireConstants.cs                          # Service name constants
-└── Aspire Chat.sln                            # Solution file
+│   └── HexMaster.Chat.Shared/                   # Common models and utilities
+│       ├── Constants/                           # Application constants
+│       ├── Events/                              # Dapr event models
+│       ├── Models/                              # Shared DTOs
+│       └── Requests/                            # API request models
+└── TestResults/                                 # Test execution results
 ```
 
 ## Development Guidelines
